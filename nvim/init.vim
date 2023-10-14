@@ -146,6 +146,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+Plug 'lambdalisue/suda.vim'
 call plug#end()
 
 " }}}
