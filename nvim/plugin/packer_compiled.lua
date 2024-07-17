@@ -94,6 +94,11 @@ _G.packer_plugins = {
     path = "/home/srk/.local/share/nvim/site/pack/packer/start/coc.nvim",
     url = "https://github.com/neoclide/coc.nvim"
   },
+  ["kanagawa.nvim"] = {
+    loaded = true,
+    path = "/home/srk/.local/share/nvim/site/pack/packer/start/kanagawa.nvim",
+    url = "https://github.com/rebelot/kanagawa.nvim"
+  },
   ["lualine.nvim"] = {
     loaded = true,
     path = "/home/srk/.local/share/nvim/site/pack/packer/start/lualine.nvim",
