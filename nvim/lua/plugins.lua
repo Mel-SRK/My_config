@@ -59,6 +59,7 @@ return require('packer').startup(function(use)
 }
     use 'dense-analysis/ale'
     use "rebelot/kanagawa.nvim"
+    use {'akinsho/bufferline.nvim', tag = "*", requires = 'nvim-tree/nvim-web-devicons'}
         ---------------------------------------
         -- NOTE: PUT YOUR THIRD PLUGIN HERE --
         ---------------------------------------

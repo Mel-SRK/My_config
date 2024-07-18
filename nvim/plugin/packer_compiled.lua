@@ -89,6 +89,11 @@ _G.packer_plugins = {
     path = "/home/srk/.local/share/nvim/site/pack/packer/start/bluloco.nvim",
     url = "https://github.com/uloco/bluloco.nvim"
   },
+  ["bufferline.nvim"] = {
+    loaded = true,
+    path = "/home/srk/.local/share/nvim/site/pack/packer/start/bufferline.nvim",
+    url = "https://github.com/akinsho/bufferline.nvim"
+  },
   ["coc.nvim"] = {
     loaded = true,
     path = "/home/srk/.local/share/nvim/site/pack/packer/start/coc.nvim",
