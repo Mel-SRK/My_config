@@ -31,4 +31,22 @@ vim.keymap.set('v', '<', '<gv', opts)
 vim.keymap.set('v', '>', '>gv', opts)
 
 -- Nvim Tree
-vim.keymap.set('n','<C-e>',':NvimTreeToggle<CR>',opts)
+vim.keymap.set('n','t',':NvimTreeFocus<CR>',opts)
+vim.keymap.set('n','T',':NvimTreeToggle<CR>',opts)
+
+-- 快速在buffer间跳转
+vim.api.nvim_set_keymap("n", "1", ":BufferLineGoToBuffer 1<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "2", ":BufferLineGoToBuffer 2<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "3", ":BufferLineGoToBuffer 3<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "4", ":BufferLineGoToBuffer 4<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "5", ":BufferLineGoToBuffer 5<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "6", ":BufferLineGoToBuffer 6<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "7", ":BufferLineGoToBuffer 7<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "8", ":BufferLineGoToBuffer 8<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "9", ":BufferLineGoToBuffer 9<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "<leader>bg", ":BufferLinePick", {noremap = true, silent = true})
+
+vim.api.nvim_set_keymap("n", "gt", ":BufferLineCycleNext<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "gT", ":BufferLineCyclePrev<CR>", {noremap = true, silent = true})
+
+
