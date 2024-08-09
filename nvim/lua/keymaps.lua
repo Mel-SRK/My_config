@@ -49,4 +49,7 @@ vim.api.nvim_set_keymap("n", "<leader>bg", ":BufferLinePick", {noremap = true, s
 vim.api.nvim_set_keymap("n", "gt", ":BufferLineCycleNext<CR>", {noremap = true, silent = true})
 vim.api.nvim_set_keymap("n", "gT", ":BufferLineCyclePrev<CR>", {noremap = true, silent = true})
 
+--q键退出
+vim.keymap.set('n','q',':q<CR>',opts)
+vim.keymap.set('n','w',':w<CR>',opts)
 
