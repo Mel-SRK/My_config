@@ -45,3 +45,7 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 提供了基于coc的提示自动补全及基于lsp的语法高亮渲染
 
 使用`t`打开目录树及回到目录树`T`打开或关闭目录树
+
+会自动保存上次打开时光标位置
+
+使用q和w快捷退出和保存
