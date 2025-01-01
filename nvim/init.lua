@@ -10,6 +10,8 @@ require('tree')
 
 --配置
 
+require'nvim-lastplace'.setup{}
+
 --bufferline
 vim.opt.termguicolors = true
 require("bufferline").setup{
