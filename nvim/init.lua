@@ -9,9 +9,8 @@ require('colors')
 require('tree')
 
 --配置
-
 require'nvim-lastplace'.setup{}
-
+require("mason").setup()
 --bufferline
 vim.opt.termguicolors = true
 require("bufferline").setup{
