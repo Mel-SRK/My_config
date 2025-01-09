@@ -16,6 +16,7 @@ cp -r ./* ~/.config
 cd ~/.config/nvim
 nvim ./lua/plugins.lua
 :w
+:checkhealth mason
 ln -s ~/.config/tmux/.tmux.conf ~/.tmux.conf
 ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ```
@@ -25,6 +26,16 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ![预览图片2.png](./预览图片2.png)
 
 随后将`My_config/tmux/tmux.sh`加入开机自启(可自行搜索)
+
+或者编辑`~/.bash_profile`或者`~/.zshrc`添加如下内容
+
+```shell
+if [ -z "$TMUX" ]; then
+
+    tmux attach -t default || tmux new -s default
+
+fi
+```
 
 # 使用方式
 
