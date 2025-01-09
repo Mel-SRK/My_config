@@ -49,7 +49,8 @@ return require('packer').startup(function(use)
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
 }
-    use "williamboman/nvim-lsp-installer"
+    use "williamboman/mason.nvim"
+    use "williamboman/mason-lspconfig.nvim"
     use 'neovim/nvim-lspconfig'
     use "jiangmiao/auto-pairs"
     use {'neoclide/coc.nvim', branch = 'release'}
@@ -58,8 +59,8 @@ return require('packer').startup(function(use)
   requires = { 'nvim-tree/nvim-web-devicons', opt = true }
 }
     use 'dense-analysis/ale'
-    use "rebelot/kanagawa.nvim"
     use 'ethanholz/nvim-lastplace'
+    use "rebelot/kanagawa.nvim"
     use {'akinsho/bufferline.nvim', tag = "*", requires = 'nvim-tree/nvim-web-devicons'}
         ---------------------------------------
         -- NOTE: PUT YOUR THIRD PLUGIN HERE --
