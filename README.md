@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim
+yay -S tmux neovim neovim-tree-lua-git
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
