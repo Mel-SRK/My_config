@@ -33,13 +33,12 @@ vim.cmd([[
 return require('packer').startup(function(use)
         -- Packer can manage itself
         use 'wbthomason/packer.nvim'
-        use {
-  'nvim-tree/nvim-tree.lua',
-  requires = {
-    'nvim-tree/nvim-web-devicons', -- optional
-  },
-  use 'simrat39/symbols-outline.nvim'
-}
+--use {禁用了使用packer管理的tree插件转向使用aur管理
+--  'nvim-tree/nvim-tree.lua',
+--  requires = {
+--    'nvim-tree/nvim-web-devicons', -- optional
+--  },
+--}
     use {
     'uloco/bluloco.nvim',
     requires = { 'rktjmp/lush.nvim' }
@@ -49,8 +48,8 @@ return require('packer').startup(function(use)
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
 }
-    use "williamboman/mason.nvim"
-    use "williamboman/mason-lspconfig.nvim"
+    use "mason-org/mason.nvim"
+    use "mason-org/mason-lspconfig.nvim"
     use 'neovim/nvim-lspconfig'
     use "jiangmiao/auto-pairs"
     use {'neoclide/coc.nvim', branch = 'release'}
