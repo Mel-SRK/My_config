@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git
+yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle waybar swaybg xwayland-satellite gdm mako noctalia-shell//mako作为通知管理与noctalia shell功能重叠
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
@@ -60,3 +60,10 @@ fi
 会自动保存上次打开时光标位置
 
 使用q和w快捷退出和保存
+
+## Niri配置
+Mod+T打开终端
+Mod+D启动fuzzel //主题配置参考https://draculatheme.com/fuzzel
+配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/
+https://www.sakimidare.top/posts/niri-manual/
+等
