@@ -7,7 +7,8 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle waybar swaybg xwayland-satellite gdm mako noctalia-shell nwg-clipman app2unit//mako作为通知管理与noctalia shell功能重叠
+yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit//mako作为通知管理与noctalia shell功能重叠
+非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
@@ -63,9 +64,13 @@ fi
 
 ## Niri配置
 Mod+T打开终端
-Mod+B打开nwg-clipman(剪切板管理工具)
----Mod+D启动fuzzel //主题配置参考https://draculatheme.com/fuzzel---
+
+~~Mod+B打开nwg-clipman(剪切板管理工具)~~
+
+Mod+B打开noctalic-shell的剪切板管理工具
+
+~~Mod+D启动fuzzel //主题配置参考https://draculatheme.com/fuzzel~~
+
 Mod+D改为启动noctalic-shell的启动器
-配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/
-https://www.sakimidare.top/posts/niri-manual/
-等
+
+配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/;https://www.sakimidare.top/posts/niri-manual/等
