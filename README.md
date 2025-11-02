@@ -73,4 +73,8 @@ Mod+B打开noctalic-shell的剪切板管理工具
 
 Mod+D改为启动noctalic-shell的启动器
 
+Ctrl+Alt+Right媒体播放下一首
+
+Ctrl+Alt+Left媒体播放上一首
+
 配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/;https://www.sakimidare.top/posts/niri-manual/等

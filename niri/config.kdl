@@ -380,6 +380,8 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // 自定义快捷键设置
+    Ctrl+Alt+Right hotkey-overlay-title="Media Controls Next"{spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "next";}
+    Ctrl+Alt+Left hotkey-overlay-title="Media Controls Next"{spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "previous";}
     //Mod+B hotkey-overlay-title="Open a Clipman: nwg-clipman" { spawn "nwg-clipman"; }
     Mod+B hotkey-overlay-title="Open a Clipman: clipboard" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
     // Suggested binds for running programs: terminal, app launcher, screen locker.
