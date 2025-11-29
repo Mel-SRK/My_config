@@ -12,9 +12,10 @@ window-rule {
     clip-to-geometry true
 }
 
+// Set the overview wallpaper on the backdrop.
 layer-rule {
-    match namespace="^quickshell-overview$"
-    place-within-backdrop true
+  match namespace="^noctalia-overview*"
+  place-within-backdrop true
 }
 
 debug {
@@ -380,6 +381,8 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // 自定义快捷键设置
+    Mod+E hotkey-overlay-title="Files Manger"{spawn "nautilus";}
+    Alt+A { screenshot; }
     Ctrl+Alt+Right hotkey-overlay-title="Media Controls Next"{spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "next";}
     Ctrl+Alt+Left hotkey-overlay-title="Media Controls Next"{spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "previous";}
     //Mod+B hotkey-overlay-title="Open a Clipman: nwg-clipman" { spawn "nwg-clipman"; }
