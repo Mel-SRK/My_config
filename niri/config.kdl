@@ -51,7 +51,7 @@ input {
         // drag false
         // drag-lock
         natural-scroll
-        // accel-speed 0.2
+        accel-speed 0.5
         // accel-profile "flat"
         // scroll-method "two-finger"
         // disabled-on-external-mouse
@@ -68,10 +68,10 @@ input {
     trackpoint {
         // off
         // natural-scroll
-        // accel-speed 0.2
+        accel-speed 0.6
         // accel-profile "flat"
         // scroll-method "on-button-down"
-        // scroll-button 273
+        //scroll-button 273
         // scroll-button-lock
         // middle-emulation
     }
@@ -640,3 +640,4 @@ binds {
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 }
+include "./noctalia.kdl"
