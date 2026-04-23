@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit//mako作为通知管理与noctalia shell功能重叠
+yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell python-lsp-server  app2unit//mako作为通知管理与noctalia shell功能重叠
 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
