@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell python-lsp-server  app2unit//mako作为通知管理与noctalia shell功能重叠
+yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell python-lsp-server app2unit//mako作为通知管理与noctalia shell功能重叠
 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
@@ -23,12 +23,13 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ```
 
 如想实现再次打开终端继续使用上次的shell,可将虚拟终端程序的启动shell改为`tmux a`(图片以kde的Konsole为例)
+建议的sddm主题:[qylock](https://github.com/darkkal44/qylock)
 
 ![预览图片2.png](./预览图片2.png)
 
 随后将`My_config/tmux/tmux.sh`加入开机自启(可自行搜索)
 
-或者编辑`~/.bash_profile`或者`~/.zshrc`添加如下内容
+或者编辑`~/.bash_profile`或者`~/.zshrc`添加如下内容(推荐)
 
 ```shell
 if [ -z "$TMUX" ]; then
