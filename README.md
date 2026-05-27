@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell python-lsp-server app2unit//mako作为通知管理与noctalia shell功能重叠
+yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort//mako作为通知管理与noctalia shell功能重叠
 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
@@ -17,7 +17,9 @@ cp -r ./* ~/.config
 cd ~/.config/nvim
 nvim ./lua/plugins.lua
 :w
-:checkhealth mason
+:wq
+cd ~/.config/coc/extensions
+npm install coc-pyright --save
 ln -s ~/.config/tmux/.tmux.conf ~/.tmux.conf
 ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ```
@@ -55,13 +57,19 @@ fi
 
 ## nvim
 
-提供了基于coc的提示自动补全及基于lsp的语法高亮渲染
+提供了基于coc.nvim的Python自动补全（coc-pyright）及基于treesitter的语法高亮渲染
 
 使用`t`打开目录树及回到目录树`T`打开或关闭目录树
 
 会自动保存上次打开时光标位置
 
 使用q和w快捷退出和保存
+
+Python相关：
+- 自动补全：输入时自动触发，Tab/Shift+Tab选择，Enter确认
+- 语法检查：ALE + pylint（只在Normal模式下检查，延迟500ms）
+- 代码格式化：手动执行`:Format`或`<leader>f`
+- 自动格式化：默认禁用（如需启用，在coc-settings.json中设置`"coc.preferences.formatOnType": true`）
 
 ## Niri配置
 Mod+T打开终端

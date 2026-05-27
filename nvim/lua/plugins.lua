@@ -33,7 +33,7 @@ vim.cmd([[
 return require('packer').startup(function(use)
         -- Packer can manage itself
         use 'wbthomason/packer.nvim'
---use {禁用了使用packer管理的tree插件转向使用aur管理
+--use {
 --  'nvim-tree/nvim-tree.lua',
 --  requires = {
 --    'nvim-tree/nvim-web-devicons', -- optional
@@ -48,9 +48,11 @@ return require('packer').startup(function(use)
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
 }
-    use "mason-org/mason.nvim"
-    use "mason-org/mason-lspconfig.nvim"
-    use 'neovim/nvim-lspconfig'
+    -- 使用coc.nvim，禁用mason-lspconfig避免冲突
+    -- use "mason-org/mason.nvim"
+    -- use "mason-org/mason-lspconfig.nvim"
+    -- use 'neovim/nvim-lspconfig'
+    -- use 'neovim/nvim-lspconfig'
     use "jiangmiao/auto-pairs"
     use {'neoclide/coc.nvim', branch = 'release'}
     use {
