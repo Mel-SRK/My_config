@@ -25,7 +25,9 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ```
 
 如想实现再次打开终端继续使用上次的shell,可将虚拟终端程序的启动shell改为`tmux a`(图片以kde的Konsole为例)
-建议的sddm主题:[qylock](https://github.com/darkkal44/qylock)
+~~建议的sddm主题:[qylock](https://github.com/darkkal44/qylock)~~
+
+建议的sddm主题:[noctalia-sddm-theme](https://github.com/mda-dev/noctalia-sddm-theme)（与noctalia-shell风格统一，支持颜色同步和壁纸同步）
 
 ![预览图片2.png](./预览图片2.png)
 
@@ -87,3 +89,22 @@ Ctrl+Alt+Right媒体播放下一首
 Ctrl+Alt+Left媒体播放上一首
 
 配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/;https://www.sakimidare.top/posts/niri-manual/等
+
+## swayidle 自动锁屏配置
+
+备份路径: `systemd/user/swayidle.service`
+
+该文件是用户级 systemd service，用于在空闲时自动锁屏。使用 swayidle 监听空闲事件，锁屏命令为 noctalia-shell 的锁屏界面（而非 swaylock）。
+
+恢复方式:
+
+```shell
+cp systemd/user/swayidle.service ~/.config/systemd/user/swayidle.service
+systemctl --user daemon-reload
+systemctl --user restart swayidle.service
+```
+
+逻辑:
+- 600秒空闲 → 调用 noctalia-shell 锁屏
+- 601秒 → 关闭显示器
+- 睡眠前 → 调用 noctalia-shell 锁屏
