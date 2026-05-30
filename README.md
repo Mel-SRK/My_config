@@ -108,3 +108,40 @@ systemctl --user restart swayidle.service
 - 600秒空闲 → 调用 noctalia-shell 锁屏
 - 601秒 → 关闭显示器
 - 睡眠前 → 调用 noctalia-shell 锁屏
+
+## Noctalia 配置覆盖
+
+备份路径: `noctalia/`
+
+2026-05-30 系统优化时创建的用户覆盖文件，用于修复 bug 和降低后台资源消耗。
+
+### 文件说明
+
+| 备份路径 | 原始路径 | 改动说明 |
+|---|---|---|
+| `noctalia/settings.json` | `~/.config/noctalia/settings.json` | DDC 开启、spectrumFrameRate=20、hermes-status 新版字段、关闭桌面可视化 |
+| `noctalia/plugins/privacy-indicator/Main.qml` | `~/.config/noctalia/plugins/privacy-indicator/Main.qml` | 摄像头扫描 Timer 1s→5s，降低 /proc 扫描频率 |
+| `noctalia/quickshell/Modules/Bar/Widgets/ActiveWindow.qml` | `~/.config/quickshell/noctalia-shell/Modules/Bar/Widgets/ActiveWindow.qml` | 修复缺失的 user-desktop fallback icon |
+| `noctalia/quickshell/Services/Networking/NetworkService.qml` | `~/.config/quickshell/noctalia-shell/Services/Networking/NetworkService.qml` | connectivity 轮询 15s→60s，事件驱动仍保留 |
+
+### 恢复方式
+
+```shell
+# noctalia 设置
+cp noctalia/settings.json ~/.config/noctalia/settings.json
+
+# privacy-indicator 插件
+cp noctalia/plugins/privacy-indicator/Main.qml ~/.config/noctalia/plugins/privacy-indicator/Main.qml
+
+# quickshell 用户覆盖（需先有完整 overlay 目录）
+cp noctalia/quickshell/Modules/Bar/Widgets/ActiveWindow.qml ~/.config/quickshell/noctalia-shell/Modules/Bar/Widgets/ActiveWindow.qml
+cp noctalia/quickshell/Services/Networking/NetworkService.qml ~/.config/quickshell/noctalia-shell/Services/Networking/NetworkService.qml
+systemctl --user restart niri.service
+```
+
+### 注意
+
+- quickshell 覆盖文件需要完整的 `~/.config/quickshell/noctalia-shell/` 目录（含 shell.qml）才能生效
+- 创建完整 overlay: `cp -an /etc/xdg/quickshell/noctalia-shell/. ~/.config/quickshell/noctalia-shell/`
+- pacman 更新 noctalia-shell 后需重新 `cp -an` 同步新文件（`-n` 不覆盖已改文件）
+- noctalia-hermes 插件（Main.qml 防重入修复）已在 ~/Git_Programe/noctalia-hermes/ 仓库中，无需重复备份
