@@ -1,0 +1,12 @@
+[Unit]
+Description=Niri 自动关闭内屏（外接显示器时）
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/niri-auto-edp.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
