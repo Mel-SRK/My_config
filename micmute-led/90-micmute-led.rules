@@ -1,0 +1,1 @@
+SUBSYSTEM=="leds", KERNEL=="platform::micmute", GROUP="input", MODE="0660"

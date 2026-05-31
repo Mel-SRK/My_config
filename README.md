@@ -145,3 +145,38 @@ systemctl --user restart niri.service
 - 创建完整 overlay: `cp -an /etc/xdg/quickshell/noctalia-shell/. ~/.config/quickshell/noctalia-shell/`
 - pacman 更新 noctalia-shell 后需重新 `cp -an` 同步新文件（`-n` 不覆盖已改文件）
 - noctalia-hermes 插件（Main.qml 防重入修复）已在 ~/Git_Programe/noctalia-hermes/ 仓库中，无需重复备份
+
+## ThinkPad 麦克风静音 LED 同步
+
+备份路径: `micmute-led/`
+
+ThinkPad Fn+麦克风静音键按下后，内核默认的 `audio-micmute` trigger 行为不正确（LED 状态与实际麦克风静音状态不同步）。此方案用脚本监听 PipeWire source 事件，手动控制 LED 灯。
+
+### 文件说明
+
+| 备份路径 | 安装路径 | 说明 |
+|---|---|---|
+| `micmute-led/micmute-led-sync.sh` | `~/.local/bin/micmute-led-sync.sh` | 监听 pactl subscribe 事件，同步 mute 状态到 LED |
+| `micmute-led/micmute-led-sync.service` | `~/.config/systemd/user/micmute-led-sync.service` | systemd 用户服务，开机自启 |
+| `micmute-led/90-micmute-led.rules` | `/etc/udev/rules.d/90-micmute-led.rules` | udev 规则，给 input 组 LED 写权限 |
+
+### 恢复方式
+
+```shell
+# udev 规则（需要 sudo）
+sudo cp micmute-led/90-micmute-led.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+
+# 脚本 + 服务
+cp micmute-led/micmute-led-sync.sh ~/.local/bin/micmute-led-sync.sh
+chmod +x ~/.local/bin/micmute-led-sync.sh
+cp micmute-led/micmute-led-sync.service ~/.config/systemd/user/micmute-led-sync.service
+systemctl --user daemon-reload
+systemctl --user enable --now micmute-led-sync.service
+```
+
+### 前提
+
+- 用户需在 `input` 组（`sudo usermod -aG input $USER`，重新登录生效）
+- udev 规则创建后首次需 `sudo chmod 660 /sys/class/leds/platform::micmute/brightness`（重启后 udev 自动应用）
+- trigger 设为 `none`（脚本启动时自动设置）
