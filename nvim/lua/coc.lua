@@ -184,3 +184,29 @@ keyset("n", "<space>j", ":<C-u>CocNext<cr>", opts)
 keyset("n", "<space>k", ":<C-u>CocPrev<cr>", opts)
 -- Resume latest coc list
 keyset("n", "<space>p", ":<C-u>CocListResume<cr>", opts)
+
+-- 隐藏 warning 级别诊断的视觉显示（虚拟文字 + 边栏标记 + 高亮）
+-- error 正常显示，warning 只在 :CocList diagnostics 里可见
+vim.api.nvim_create_autocmd("ColorScheme", {
+    group = "CocGroup",
+    callback = function()
+        -- warning 虚拟文字和下划线高亮设为透明
+        vim.cmd("hi CocWarningVirtualText guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocWarningFloat guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocWarningHighlight guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=NONE cterm=NONE")
+        -- hint/info 同样隐藏
+        vim.cmd("hi CocHintVirtualText guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocInfoVirtualText guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocHintFloat guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocInfoFloat guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocHintHighlight guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=NONE cterm=NONE")
+        vim.cmd("hi CocInfoHighlight guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=NONE cterm=NONE")
+        -- warning sign 设为透明（边栏不显示 ⚠）
+        vim.cmd("hi CocWarningSign guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocHintSign guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+        vim.cmd("hi CocInfoSign guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE")
+    end,
+    desc = "Hide warning/hint/info diagnostic visuals, keep errors"
+})
+-- 立即应用（首次加载时）
+vim.cmd("doautocmd ColorScheme")
