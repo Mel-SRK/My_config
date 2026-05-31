@@ -1,38 +1,27 @@
--- ALE配置 - 只用于语法检查，不用于LSP
-vim.g.ale_linters = {
-    python = {'pylint'},
-}
-
-vim.g.ale_python_flake8_options = '--ignore=F403,F401,E501'
+-- ALE配置 - 只用于格式化修复（:ALEFix），不做 lint（诊断交给 coc.nvim）
+vim.g.ale_linters = {}
 
 vim.g.ale_fixers = {
     python = {'black', 'isort'},
 }
 
-vim.g.ale_sign_error = '✖'
-vim.g.ale_sign_warning = '⚠'
-vim.g.ale_sign_info = 'ℹ'
-
-vim.g.ale_python_flake8_executable = 'flake8'
-vim.g.ale_python_pylint_executable = 'pylint'
-
--- 禁用ALE的LSP功能，使用coc.nvim的LSP
+-- 禁用ALE的LSP功能
 vim.g.ale_disable_lsp = 1
 
 -- 禁用保存时自动修复
 vim.g.ale_fix_on_save = 0
 
--- 优化延迟
-vim.g.ale_lint_delay = 500
-vim.g.ale_lint_on_text_changed = 'normal'
-vim.g.ale_lint_on_insert_leave = 1
+-- 关闭所有 lint 触发（诊断由 coc.nvim 处理）
+vim.g.ale_lint_on_text_changed = 'never'
+vim.g.ale_lint_on_insert_leave = 0
+vim.g.ale_lint_on_save = 0
+vim.g.ale_lint_on_enter = 0
 
--- 显示行号
-vim.g.ale_set_signs = 1
-vim.g.ale_set_highlights = 1
+-- 关闭 ALE 的 sign 和高亮（避免和 coc.nvim 重复）
+vim.g.ale_set_signs = 0
+vim.g.ale_set_highlights = 0
+vim.g.ale_set_loclist = 0
+vim.g.ale_set_quickfix = 0
 
--- 键盘映射
+-- 键盘映射（只保留格式化）
 vim.keymap.set('n', '<leader>af', ':ALEFix<CR>', {noremap = true, silent = true})
-vim.keymap.set('n', '<leader>al', ':ALELint<CR>', {noremap = true, silent = true})
-vim.keymap.set('n', '[a', ':ALEPrevious<CR>', {noremap = true, silent = true})
-vim.keymap.set('n', ']a', ':ALENext<CR>', {noremap = true, silent = true})

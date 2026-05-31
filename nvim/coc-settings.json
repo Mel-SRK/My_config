@@ -15,7 +15,7 @@
   },
   "python.analysis.autoFormatStrings": true,
   "coc.preferences.formatOnSave": false,
-  "coc.preferences.formatOnType": true,
+  "coc.preferences.formatOnType": false,
   "suggest.noselect": false,
   "suggest.enablePreview": true,
   "suggest.triggerAfterInsertEnter": true,
@@ -60,5 +60,12 @@
     "event": "E",
     "operator": "O",
     "typeParameter": "T"
-  }
+  },
+  "python.analysis.inlayHints": {
+    "functionReturnTypes": false,
+    "variableTypes": false,
+    "parameterNames": false,
+    "parameterTypes": false
+  },
+  "inlayHint.enable": false
 }
