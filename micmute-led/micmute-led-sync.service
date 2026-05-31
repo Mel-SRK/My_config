@@ -1,0 +1,16 @@
+[Unit]
+Description=Sync micmute LED with PipeWire mute state
+After=pipewire.service
+PartOf=pipewire.service
+
+[Service]
+Type=simple
+ExecStart=/home/srk/.local/bin/micmute-led-sync.sh
+Restart=on-failure
+RestartSec=5
+# Prevent crash loops: max 3 restarts in 60s
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=default.target
