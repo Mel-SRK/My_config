@@ -144,7 +144,7 @@ systemctl --user restart niri.service
 - quickshell 覆盖文件需要完整的 `~/.config/quickshell/noctalia-shell/` 目录（含 shell.qml）才能生效
 - 创建完整 overlay: `cp -an /etc/xdg/quickshell/noctalia-shell/. ~/.config/quickshell/noctalia-shell/`
 - pacman 更新 noctalia-shell 后需重新 `cp -an` 同步新文件（`-n` 不覆盖已改文件）
-- noctalia-hermes 插件（Main.qml 防重入修复）已在 ~/Git_Programe/noctalia-hermes/ 仓库中，无需重复备份
+- noctalia-hermes 插件（Main.qml 防重入修复）已在 ~/Git_Program/noctalia-hermes/ 仓库中，无需重复备份
 
 ## ThinkPad 麦克风静音 LED 同步
 
