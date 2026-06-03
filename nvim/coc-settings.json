@@ -67,5 +67,6 @@
     "parameterNames": false,
     "parameterTypes": false
   },
-  "inlayHint.enable": false
+  "inlayHint.enable": false,
+  "coc.preferences.enableHover": false
 }
