@@ -68,5 +68,5 @@
     "parameterTypes": false
   },
   "inlayHint.enable": false,
-  "coc.preferences.enableHover": false
+  "signature.enable": false
 }
