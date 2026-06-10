@@ -1,2 +1,13 @@
+[general]
+import = ["~/.config/alacritty/themes/noctalia.toml"]
+#import = ["~/.config/alacritty/themes/noctalia.toml"]
+
+[font]
+size = 11.0
+
+[font.normal]
+family = "CaskaydiaCove Nerd Font Mono"
+style = "Regular"
+
 [window]
-opacity = 0.85
+opacity = 0.8
