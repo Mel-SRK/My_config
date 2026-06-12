@@ -53,3 +53,7 @@ vim.api.nvim_set_keymap("n", "gT", ":BufferLineCyclePrev<CR>", {noremap = true, 
 vim.keymap.set('n','q',':q<CR>',opts)
 vim.keymap.set('n','w',':w<CR>',opts)
 
+-- 注释快捷键（VSCode风格 Ctrl+/）
+vim.keymap.set('n', '<C-_>', 'gcc', { remap = true, silent = true })
+vim.keymap.set('v', '<C-_>', 'gc', { remap = true, silent = true })
+
