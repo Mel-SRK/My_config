@@ -7,19 +7,16 @@
 # 安装
 
 ```shell
-yay -S tmux neovim neovim-tree-lua-git niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort//mako作为通知管理与noctalia shell功能重叠
-非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
+yay -S tmux neovim niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort tree-sitter-cli
+# 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
-git clone --depth 1 https://github.com/wbthomason/packer.nvim\
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 cp -r ./* ~/.config
-cd ~/.config/nvim
-nvim ./lua/plugins.lua
-:w
-:wq
-cd ~/.config/coc/extensions
-npm install coc-pyright --save
+# lazy.nvim 会在首次启动 nvim 时自动安装，无需手动操作
+# Mason LSP 服务器会在首次启动时自动下载
+# 格式化工具
+pip install black isort
+# tmux 配置
 ln -s ~/.config/tmux/.tmux.conf ~/.tmux.conf
 ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 ```
@@ -59,19 +56,63 @@ fi
 
 ## nvim
 
-提供了基于coc.nvim的Python自动补全（coc-pyright）及基于treesitter的语法高亮渲染
+基于 lazy.nvim + 原生 LSP + nvim-cmp 的 Python/多语言开发环境
 
-使用`t`打开目录树及回到目录树`T`打开或关闭目录树
+### 基础操作
 
-会自动保存上次打开时光标位置
+| 快捷键 | 功能 |
+|---|---|
+| `t` | 打开/关闭目录树 |
+| `1`-`9` | 跳转到第 N 个 buffer |
+| `gt` / `gT` | 下一个/上一个 buffer |
+| `w` / `q` | 保存 / 退出 |
+| `<C-_>` | 注释切换 |
+| `<Esc>` | 清除搜索高亮 |
 
-使用q和w快捷退出和保存
+### 模糊搜索（fzf-lua）
 
-Python相关：
-- 自动补全：输入时自动触发，Tab/Shift+Tab选择，Enter确认
-- 语法检查：ALE + pylint（只在Normal模式下检查，延迟500ms）
-- 代码格式化：手动执行`:Format`或`<leader>f`
-- 自动格式化：默认禁用（如需启用，在coc-settings.json中设置`"coc.preferences.formatOnType": true`）
+| 快捷键 | 功能 |
+|---|---|
+| `<leader>ff` | 搜文件名 |
+| `<leader>fs` | 全局搜内容 |
+| `<leader>fb` | 搜已打开 buffer |
+| `<leader>fh` | 最近文件 |
+| `<leader>fg` | git 改动文件 |
+
+### LSP 代码导航
+
+| 快捷键 | 功能 |
+|---|---|
+| `gd` | 跳转到定义 |
+| `gr` | 查找引用 |
+| `K` | 悬停文档 |
+| `<leader>rn` | 重命名 |
+| `<leader>ca` | Code Action |
+| `<leader>af` | 格式化代码 |
+| `[g` / `]g` | 上一个/下一个诊断 |
+
+### Git
+
+| 快捷键 | 功能 |
+|---|---|
+| `gn` / `gp` | 下一个/上一个 hunk |
+| `<leader>gb` | 行内 blame |
+| `<leader>gp` | 预览 hunk |
+| `<leader>gr` | 重置 hunk |
+
+### Python
+
+- 补全：nvim-cmp + pyright，输入时自动触发，Tab/Shift-Tab 选择，Enter 确认
+- 格式化：conform.nvim 保存时自动调用 black + isort
+- 诊断：仅显示 ERROR 级别，隐藏 warning/info 噪音
+- 手动格式化：`<leader>af`
+
+### 其他
+
+- 启动仪表盘（alpha-nvim）：不带文件打开 nvim 时显示
+- Markdown 预览：`<leader>mp` 在浏览器中渲染预览
+- 光标词高亮（vim-illuminate）：自动标注所有相同单词
+- tmux 集成：Ctrl-hjkl 无缝切换 nvim 窗口和 tmux pane
 
 ## Niri配置
 Mod+T打开终端
