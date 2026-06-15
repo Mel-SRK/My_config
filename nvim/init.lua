@@ -1,27 +1,24 @@
---加载文件
-require('options') 
-require('keymaps') 
-require('plugins') 
-require('treesitter') 
-require('coc') 
-require('lualine').setup()
-require('colors')
-require('tree')
---require('lsp')
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
---配置
-require'nvim-lastplace'.setup{}
--- 使用coc.nvim，禁用mason-lspconfig避免冲突
--- require("mason").setup()
--- require('lsp/setup')
-require('ale_config')
---bufferline
-vim.opt.termguicolors = true
-require("bufferline").setup{
-    options = {
-        mode = "buffer",
-        -- 显示id
-        number = "ordinal"
-    }
-}
+-- Load core settings FIRST (before plugins)
+require("core.options")
+require("core.keymaps")
+require("core.autocmd")
 
+-- Load plugins (lazy.nvim will handle setup)
+require("lazy").setup("plugins", {
+  change_detection = { notify = false },
+})
+
+-- Colorscheme (must be after lazy loads plugins)
+vim.cmd.colorscheme("kanagawa-dragon")
