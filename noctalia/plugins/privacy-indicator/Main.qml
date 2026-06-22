@@ -70,9 +70,7 @@ Item {
 
 
   Timer {
-    // Polling /proc every second is expensive on this machine. PipeWire still
-    // tracks mic/screen; camera fallback can be lower frequency.
-    interval: 5000
+    interval: 1000
     repeat: true
     running: true
     triggeredOnStart: true
