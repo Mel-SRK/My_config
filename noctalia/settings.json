@@ -494,14 +494,14 @@
     "hooks": {
         "colorGeneration": "",
         "darkModeChange": "",
-        "enabled": false,
+        "enabled": true,
         "performanceModeDisabled": "",
         "performanceModeEnabled": "",
         "screenLock": "",
         "screenUnlock": "",
         "session": "",
         "startup": "",
-        "wallpaperChange": ""
+        "wallpaperChange": "/usr/share/sddm/themes/noctalia/sync-shell-wallpaper.sh"
     },
     "idle": {
         "customCommands": "[]",
@@ -729,7 +729,7 @@
                 "id": "btop"
             }
         ],
-        "enableUserTheming": false
+        "enableUserTheming": true
     },
     "ui": {
         "boxBorderEnabled": false,
