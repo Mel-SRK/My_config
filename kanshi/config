@@ -1,0 +1,19 @@
+profile docked {
+    output eDP-1 disable
+
+    output DP-1 {
+        enable
+        mode 2560x1440@200.000
+        position 0,0
+        scale 1
+    }
+}
+
+profile mobile {
+    output eDP-1 {
+        enable
+        mode 2240x1400@60.002
+        position 0,0
+        scale 1.35
+    }
+}

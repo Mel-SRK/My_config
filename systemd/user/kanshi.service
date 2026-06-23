@@ -1,0 +1,14 @@
+[Unit]
+Description=Kanshi dynamic output configuration
+Documentation=man:kanshi(1) man:kanshi(5)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kanshi -c %h/.config/kanshi/config
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target
