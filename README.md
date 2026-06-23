@@ -131,6 +131,46 @@ Ctrl+Alt+Left媒体播放上一首
 
 配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/;https://www.sakimidare.top/posts/niri-manual/等
 
+## 外接显示器自动切换（kanshi）
+
+当前推荐方案：`kanshi`。用于在 niri/Wayland 下根据显示器热插拔自动切换输出配置：
+
+- 插上外接显示器 `DP-1`（HKC G27H2Max）：关闭内屏 `eDP-1`，只使用外接屏，`2560x1440@200Hz`，scale 1
+- 拔掉外接显示器：恢复内屏 `eDP-1`，`2240x1400@60.002Hz`，scale 1.35
+
+已实测：`docked -> mobile -> docked` 双向热插拔切换成功。
+
+### 文件说明
+
+| 备份路径 | 安装路径 | 说明 |
+|---|---|---|
+| `kanshi/config` | `~/.config/kanshi/config` | kanshi 输出 profile：外接屏模式关闭内屏，移动模式恢复内屏 |
+| `systemd/user/kanshi.service` | `~/.config/systemd/user/kanshi.service` | kanshi 用户级 systemd 服务，随图形会话启动 |
+
+### 恢复方式
+
+```shell
+sudo pacman -S kanshi
+mkdir -p ~/.config/kanshi ~/.config/systemd/user
+cp kanshi/config ~/.config/kanshi/config
+cp systemd/user/kanshi.service ~/.config/systemd/user/kanshi.service
+systemctl --user daemon-reload
+systemctl --user enable --now kanshi.service
+```
+
+验证：
+
+```shell
+systemctl --user status kanshi.service
+niri msg outputs
+```
+
+### 注意
+
+- `mobile` profile 中必须显式写 `enable`，否则 kanshi 可能匹配 mobile 但无法重新启用被关闭过的 `eDP-1`。
+- kanshi 判断的是显示器物理连接状态：DP 线仍插着时会保持外接屏模式；拔掉 DP 线才会恢复内屏。
+- 旧方案 `niri-auto-edp/` 保留为 fallback/历史方案。它基于脚本监听热插拔并调用 `niri msg`，不作为当前推荐方案。除非 kanshi 在未来版本中失效，否则优先使用 kanshi。
+
 ## swayidle 自动锁屏配置
 
 备份路径: `systemd/user/swayidle.service`
