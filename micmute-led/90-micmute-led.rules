@@ -1,1 +1,1 @@
-SUBSYSTEM=="leds", KERNEL=="platform::micmute", GROUP="input", MODE="0660"
+SUBSYSTEM=="leds", KERNEL=="platform::micmute", RUN+="/usr/bin/chmod 0660 /sys/class/leds/platform::micmute/brightness", RUN+="/usr/bin/chgrp input /sys/class/leds/platform::micmute/brightness"

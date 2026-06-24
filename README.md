@@ -7,7 +7,7 @@
 # 安装
 
 ```shell
-yay -S tmux neovim niri alacritty fuzzel swaylock swayidle swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort tree-sitter-cli
+yay -S tmux neovim niri alacritty fuzzel swaylock swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort tree-sitter-cli
 # 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
@@ -171,24 +171,16 @@ niri msg outputs
 - kanshi 判断的是显示器物理连接状态：DP 线仍插着时会保持外接屏模式；拔掉 DP 线才会恢复内屏。
 - 旧方案 `niri-auto-edp/` 保留为 fallback/历史方案。它基于脚本监听热插拔并调用 `niri msg`，不作为当前推荐方案。除非 kanshi 在未来版本中失效，否则优先使用 kanshi。
 
-## swayidle 自动锁屏配置
+## ~~swayidle 自动锁屏配置~~ (已废弃)
 
-备份路径: `systemd/user/swayidle.service`
-
-该文件是用户级 systemd service，用于在空闲时自动锁屏。使用 swayidle 监听空闲事件，锁屏命令为 noctalia-shell 的锁屏界面（而非 swaylock）。
-
-恢复方式:
-
-```shell
-cp systemd/user/swayidle.service ~/.config/systemd/user/swayidle.service
-systemctl --user daemon-reload
-systemctl --user restart swayidle.service
-```
-
-逻辑:
-- 600秒空闲 → 调用 noctalia-shell 锁屏
-- 601秒 → 关闭显示器
-- 睡眠前 → 调用 noctalia-shell 锁屏
+> **2026-06-23**: noctalia-shell 已原生支持空闲管理（idle timeout + lock + monitor power），
+> 不再需要 swayidle + idle-action.sh 的手动链路。
+> 以下文件保留在仓库中仅供历史参考，不再部署。
+>
+> - `systemd/user/swayidle.service` — 已废弃
+> - `local/bin/idle-action.sh` — 已废弃
+>
+> 新方案：在 noctalia-shell 设置中直接配置空闲超时和锁屏行为。
 
 ## Noctalia 配置覆盖
 
@@ -239,7 +231,7 @@ ThinkPad Fn+麦克风静音键按下后，内核默认的 `audio-micmute` trigge
 |---|---|---|
 | `micmute-led/micmute-led-sync.sh` | `~/.local/bin/micmute-led-sync.sh` | 监听 pactl subscribe 事件，同步 mute 状态到 LED |
 | `micmute-led/micmute-led-sync.service` | `~/.config/systemd/user/micmute-led-sync.service` | systemd 用户服务，开机自启 |
-| `micmute-led/90-micmute-led.rules` | `/etc/udev/rules.d/90-micmute-led.rules` | udev 规则，给 input 组 LED 写权限 |
+| `micmute-led/90-micmute-led.rules` | `/etc/udev/rules.d/90-micmute-led.rules` | udev 规则，通过 RUN+= 设置 LED 文件权限 |
 
 ### 恢复方式
 
@@ -247,6 +239,7 @@ ThinkPad Fn+麦克风静音键按下后，内核默认的 `audio-micmute` trigge
 # udev 规则（需要 sudo）
 sudo cp micmute-led/90-micmute-led.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=leds
 
 # 脚本 + 服务
 cp micmute-led/micmute-led-sync.sh ~/.local/bin/micmute-led-sync.sh
@@ -259,5 +252,9 @@ systemctl --user enable --now micmute-led-sync.service
 ### 前提
 
 - 用户需在 `input` 组（`sudo usermod -aG input $USER`，重新登录生效）
-- udev 规则创建后首次需 `sudo chmod 660 /sys/class/leds/platform::micmute/brightness`（重启后 udev 自动应用）
 - trigger 设为 `none`（脚本启动时自动设置）
+
+### 踩坑记录
+
+- udev 的 `GROUP=`/`MODE=` 只对 `/dev/` 设备节点生效，对 `/sys/` 下的 sysfs 属性文件（如 brightness）无效，必须用 `RUN+=/usr/bin/chmod` + `RUN+=/usr/bin/chgrp` 手动设置权限
+- systemd service 的 `StartLimitIntervalSec` 必须写在 `[Unit]` 段，放在 `[Service]` 段会被忽略
