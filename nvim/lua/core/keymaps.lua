@@ -62,3 +62,17 @@ map("n", "<leader>mp", ":MarkdownPreview<CR>", opts)
 
 -- Clear search highlight
 map("n", "<Esc>", ":nohlsearch<CR>", opts)
+
+-- Snippet jump (Ctrl+l / Ctrl+h)
+map({ "i", "s" }, "<C-l>", function()
+  local luasnip = require("luasnip")
+  if luasnip.expand_or_jumpable() then
+    luasnip.expand_or_jump()
+  end
+end, { silent = true })
+map({ "i", "s" }, "<C-h>", function()
+  local luasnip = require("luasnip")
+  if luasnip.jumpable(-1) then
+    luasnip.jump(-1)
+  end
+end, { silent = true })
