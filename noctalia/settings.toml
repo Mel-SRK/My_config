@@ -1,0 +1,211 @@
+config_version = 14
+
+[accessibility]
+ui_scale = 1.1500000096857548
+
+[audio]
+enable_sounds = true
+notification_sound = "/home/srk/Music/通知音效/dragon-studio-new-notification-3-398649.mp3"
+
+[backdrop]
+enabled = true
+
+[bar.default]
+background_opacity = 0.79999998211860657
+center = [ "workspaces" ]
+contact_shadow = true
+end = [ "tray", "volume", "clipboard", "brightness", "battery", "notifications", "clock" ]
+margin_ends = 0
+radius = 0
+start = [ "active_window", "sysmon", "media" ]
+
+[battery]
+warning_threshold = 20
+
+[brightness]
+enable_ddcutil = true
+
+[calendar]
+enabled = true
+
+[desktop_widgets]
+schema_version = 2
+widget_order = [ "desktop-widget-0000000000000001", "desktop-widget-0000000000000002", "desktop-widget-0000000000000003" ]
+
+    [desktop_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [desktop_widgets.widget.desktop-widget-0000000000000001]
+    box_height = 0.0
+    box_width = 0.0
+    cx = 162.5
+    cy = 139.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "clock"
+
+    [desktop_widgets.widget.desktop-widget-0000000000000002]
+    box_height = 112.0
+    box_width = 256.0
+    cx = 192.0
+    cy = 296.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "weather"
+
+    [desktop_widgets.widget.desktop-widget-0000000000000003]
+    box_height = 0.0
+    box_width = 0.0
+    cx = 418.70001220703125
+    cy = 1132.25
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "calendar"
+
+[location]
+address = "德安县"
+
+[lockscreen]
+blur_intensity = 0.19999999552965164
+
+[lockscreen_widgets]
+enabled = true
+schema_version = 2
+widget_order = [ "lockscreen-login-box@DP-1" ]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1280.0
+    cy = 1258.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-1".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+[osd]
+background_opacity = 0.86999998055398464
+border = false
+position = "top_right"
+position_vertical = "top_right"
+
+    [osd.kinds]
+    keyboard_layout = false
+
+[plugins]
+auto_update = "all"
+enabled = [ "noctalia/wallhaven" ]
+
+[shell]
+avatar_path = "/home/srk/Pictures/头像.png"
+launch_apps_as_systemd_services = true
+panel_anchor_bar = "default"
+password_style = "random"
+screen_time_enabled = true
+
+    [shell.animation]
+    speed = 1.1000000163912773
+
+    [shell.launcher]
+    categories = false
+    show_app_origin_indicator = false
+
+    [shell.panel]
+    floating_layer = "top"
+    open_near_click_control_center = true
+    transparency_mode = "soft"
+
+    [shell.screenshot]
+    directory = "/home/srk/Pictures"
+    remember_last_region = true
+
+    [shell.shadow]
+    direction = "center"
+
+    [shell.window_switcher]
+    mru = true
+
+[theme]
+builtin = "Ayu"
+community_palette = "GitHub Dark"
+source = "community"
+wallpaper_scheme = "m3-content"
+
+    [theme.templates]
+    builtin_ids = [
+        "alacritty",
+        "btop",
+        "cava",
+        "foot",
+        "gtk3",
+        "gtk4",
+        "ghostty",
+        "hyprland",
+        "kcolorscheme",
+        "kitty",
+        "labwc",
+        "mango",
+        "niri",
+        "qt",
+        "umbriel"
+    ]
+
+[wallpaper]
+directory = "/home/srk/Pictures/wallhaven"
+transition = [ "fade", "wipe", "zoom" ]
+transition_on_startup = true
+
+    [wallpaper.automation]
+    enabled = true
+    interval_seconds = 600
+
+    [wallpaper.default]
+    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+
+    [wallpaper.last]
+    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+
+    [wallpaper.monitors.DP-1]
+    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+
+[widget.battery]
+display_mode = "graphic"
+
+[widget.brightness]
+show_label = false
+
+[widget.tray]
+drawer = true
+
+[widget.volume]
+show_label = false
