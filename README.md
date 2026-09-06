@@ -7,8 +7,8 @@
 # 安装
 
 ```shell
-yay -S tmux neovim niri alacritty fuzzel swaylock swaybg xwayland-satellite gdm noctalia-shell app2unit python-pynvim python-flake8 python-pylint python-isort tree-sitter-cli
-# 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar
+sudo pacman -S tmux neovim niri alacritty fuzzel swaylock swaybg xwayland-satellite sddm noctalia app2unit python-pynvim python-flake8 python-pylint python-isort tree-sitter-cli
+# 非必要包(曾经使用的，现在无需理会)：mako nwg-clipman waybar noctalia-shell noctalia-qs gdm
 git clone https://github.com/Mel-SRK/My_config
 cd ./My_config
 cp -r ./* ~/.config
@@ -24,7 +24,7 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 如想实现再次打开终端继续使用上次的shell,可将虚拟终端程序的启动shell改为`tmux a`(图片以kde的Konsole为例)
 ~~建议的sddm主题:[qylock](https://github.com/darkkal44/qylock)~~
 
-建议的sddm主题:[noctalia-sddm-theme](https://github.com/mda-dev/noctalia-sddm-theme)（与noctalia-shell风格统一，支持颜色同步和壁纸同步）
+建议的sddm主题:[noctalia-sddm-theme](https://github.com/mda-dev/noctalia-sddm-theme)（unofficial，与 Noctalia v5 配色/壁纸同步；官方 v5 greeter 是 greetd 的 noctalia-greeter，本机仍用 SDDM）
 
 ![预览图片2.png](./预览图片2.png)
 
@@ -119,15 +119,21 @@ Mod+T打开终端
 
 ~~Mod+B打开nwg-clipman(剪切板管理工具)~~
 
-Mod+B打开noctalic-shell的剪切板管理工具
+Mod+B打开 Noctalia v5 剪贴板面板（`noctalia msg panel-toggle clipboard`）
 
 ~~Mod+D启动fuzzel //主题配置参考https://draculatheme.com/fuzzel~~
 
-Mod+D改为启动noctalic-shell的启动器
+Mod+D打开 Noctalia v5 启动器（`noctalia msg panel-toggle launcher`）
 
-Ctrl+Alt+Right媒体播放下一首
+Super+Alt+L 锁屏（`noctalia msg session lock`）
 
-Ctrl+Alt+Left媒体播放上一首
+Mod+O niri overview（背景走 noctalia-backdrop 层）
+
+Ctrl+Alt+Right / XF86AudioNext 媒体下一首
+
+Ctrl+Alt+Left / XF86AudioPrev 媒体上一首
+
+Fn 亮度：`noctalia msg brightness-up/down`（不再用 brightnessctl）
 
 配置参考:https://kznleaf.top/2025/09/18/niri%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE/;https://www.sakimidare.top/posts/niri-manual/等
 
@@ -182,42 +188,52 @@ niri msg outputs
 >
 > 新方案：在 noctalia-shell 设置中直接配置空闲超时和锁屏行为。
 
-## Noctalia 配置覆盖
+## Noctalia v5（当前）
 
-备份路径: `noctalia/`
+2026-09-06 从 AUR `noctalia-shell` + `noctalia-qs`（Quickshell / `qs -c noctalia-shell`）切到 extra 仓库的 `noctalia`（C++ 重写，二进制 `/usr/bin/noctalia`）。**没有官方 JSON→TOML 迁移**，v4 设置当历史保留，不部署。
 
-2026-05-30 系统优化时创建的用户覆盖文件，用于修复 bug 和降低后台资源消耗。
+启动：niri `spawn-at-startup "noctalia"`。IPC 一律 `noctalia msg ...`，旧命令 `qs -c noctalia-shell ipc call ...` 已失效。
 
 ### 文件说明
 
-| 备份路径 | 原始路径 | 改动说明 |
+| 备份路径 | 原始路径 | 说明 |
 |---|---|---|
-| `noctalia/settings.json` | `~/.config/noctalia/settings.json` | DDC 开启、spectrumFrameRate=20、hermes-status 新版字段、关闭桌面可视化 |
-| `noctalia/plugins/privacy-indicator/Main.qml` | `~/.config/noctalia/plugins/privacy-indicator/Main.qml` | 摄像头扫描 Timer 1s→5s，降低 /proc 扫描频率 |
-| `noctalia/quickshell/Modules/Bar/Widgets/ActiveWindow.qml` | `~/.config/quickshell/noctalia-shell/Modules/Bar/Widgets/ActiveWindow.qml` | 修复缺失的 user-desktop fallback icon |
-| `noctalia/quickshell/Services/Networking/NetworkService.qml` | `~/.config/quickshell/noctalia-shell/Services/Networking/NetworkService.qml` | connectivity 轮询 15s→60s，事件驱动仍保留 |
+| `niri/config.kdl` | `~/.config/niri/config.kdl` | v5 启动、快捷键、overview layer-rule `^noctalia-backdrop` |
+| `niri/noctalia.kdl` | `~/.config/niri/noctalia.kdl` | niri 边框/焦点色（当前 GitHub Dark） |
+| `noctalia/config.toml` | `~/.config/noctalia/config.toml` | 声明式：backdrop、SDDM user template、wallpaper hook |
+| `noctalia/settings.toml` | `~/.local/state/noctalia/settings.toml` | GUI/运行时状态，**优先级高于 config.toml** |
+| `local/bin/sddm-sync-wallpaper.sh` | `~/.local/bin/sddm-sync-wallpaper.sh` | v5 `wallpaper_changed` hook，拷当前壁纸到 SDDM 主题 |
+
+v4 历史（不要部署到 v5）：`noctalia/settings.json`、`noctalia/plugins/`、`noctalia/quickshell/`。
 
 ### 恢复方式
 
 ```shell
-# noctalia 设置
-cp noctalia/settings.json ~/.config/noctalia/settings.json
-
-# privacy-indicator 插件
-cp noctalia/plugins/privacy-indicator/Main.qml ~/.config/noctalia/plugins/privacy-indicator/Main.qml
-
-# quickshell 用户覆盖（需先有完整 overlay 目录）
-cp noctalia/quickshell/Modules/Bar/Widgets/ActiveWindow.qml ~/.config/quickshell/noctalia-shell/Modules/Bar/Widgets/ActiveWindow.qml
-cp noctalia/quickshell/Services/Networking/NetworkService.qml ~/.config/quickshell/noctalia-shell/Services/Networking/NetworkService.qml
-systemctl --user restart niri.service
+sudo pacman -S noctalia
+# 若仍装着 AUR 旧包：sudo pacman -Rns noctalia-shell noctalia-qs
+mkdir -p ~/.config/noctalia ~/.local/state/noctalia ~/.local/bin
+cp niri/config.kdl ~/.config/niri/config.kdl
+cp niri/noctalia.kdl ~/.config/niri/noctalia.kdl
+cp noctalia/config.toml ~/.config/noctalia/config.toml
+cp noctalia/settings.toml ~/.local/state/noctalia/settings.toml
+cp local/bin/sddm-sync-wallpaper.sh ~/.local/bin/sddm-sync-wallpaper.sh
+chmod +x ~/.local/bin/sddm-sync-wallpaper.sh
+# 然后注销或 `niri msg action load-config-file`，确认 `pgrep -a noctalia`
 ```
+
+### SDDM 配色/壁纸同步（仍用 unofficial 主题，不换 greetd）
+
+- 配色：`config.toml` 里 `[theme.templates.user.sddm]`，改配色后 `noctalia msg templates-apply`
+- 壁纸：`[hooks] wallpaper_changed` 指向 `sddm-sync-wallpaper.sh`（读 `NOCTALIA_WALLPAPER_PATH`，不再读 v4 的 `~/.cache/noctalia/wallpapers.json`）
+- `theme.conf` 需对用户可写（现为 `srk:srk 666`）
 
 ### 注意
 
-- quickshell 覆盖文件需要完整的 `~/.config/quickshell/noctalia-shell/` 目录（含 shell.qml）才能生效
-- 创建完整 overlay: `cp -an /etc/xdg/quickshell/noctalia-shell/. ~/.config/quickshell/noctalia-shell/`
-- pacman 更新 noctalia-shell 后需重新 `cp -an` 同步新文件（`-n` 不覆盖已改文件）
-- noctalia-hermes 插件（Main.qml 防重入修复）已在 ~/Git_Program/noctalia-hermes/ 仓库中，无需重复备份
+- `~/.local/state/noctalia/settings.toml` 会盖掉 `config.toml`。声明式值“不生效”时先 grep 这份 state。
+- overview 壁纸要 **backdrop.enabled=true（config 和 state 都要）** + niri `match namespace="^noctalia-backdrop"`。v4 的 `^noctalia-overview*` 在 v5 是空匹配。
+- Win+B 必须是 `panel-toggle clipboard`，不是 launcher。
+- v4 QML 插件和 `~/.config/noctalia/quickshell/` overlay 对 v5 无效。
+- noctalia-hermes 插件（v4）在 `~/Git_Program/noctalia-hermes/`，v5 不能直接用。
 
 ## ThinkPad 麦克风静音 LED 同步
 
