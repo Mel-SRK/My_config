@@ -274,3 +274,31 @@ systemctl --user enable --now micmute-led-sync.service
 
 - udev 的 `GROUP=`/`MODE=` 只对 `/dev/` 设备节点生效，对 `/sys/` 下的 sysfs 属性文件（如 brightness）无效，必须用 `RUN+=/usr/bin/chmod` + `RUN+=/usr/bin/chgrp` 手动设置权限
 - systemd service 的 `StartLimitIntervalSec` 必须写在 `[Unit]` 段，放在 `[Service]` 段会被忽略
+
+## GTK / Electron 暗色（Obsidian / Sidra）
+
+2026-09-08：Obsidian 与 Sidra 同时变亮，系统 portal 仍是 `color-scheme=1`。根因是 Electron 把 gsettings 的 `Adwaita-dark` 当成亮色主题；本机也没装 `gnome-themes-extra`，该名字没有对应主题目录。
+
+### 文件说明
+
+| 备份路径 | 原始路径 | 说明 |
+|---|---|---|
+| `gtk-3.0/settings.ini` | `~/.config/gtk-3.0/settings.ini` | `gtk-theme-name=Adwaita` + `gtk-application-prefer-dark-theme=true` |
+| `gtk-4.0/settings.ini` | `~/.config/gtk-4.0/settings.ini` | 同上 |
+| `environment.d/gtk-dark.conf` | `~/.config/environment.d/gtk-dark.conf` | `GTK_THEME=Adwaita:dark`（Electron 只认冒号写法） |
+
+gsettings：`gtk-theme='Adwaita'`，`color-scheme='prefer-dark'`。不要设成 `Adwaita-dark`。
+
+### 恢复方式
+
+```shell
+mkdir -p ~/.config/gtk-3.0 ~/.config/gtk-4.0 ~/.config/environment.d
+cp gtk-3.0/settings.ini ~/.config/gtk-3.0/settings.ini
+cp gtk-4.0/settings.ini ~/.config/gtk-4.0/settings.ini
+cp environment.d/gtk-dark.conf ~/.config/environment.d/gtk-dark.conf
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+# environment.d 对从 niri 启动的应用要重新登录才生效
+```
+
+当前会话可先：`systemctl --user set-environment GTK_THEME=Adwaita:dark`，然后完全退出并重开 Obsidian/Sidra。
