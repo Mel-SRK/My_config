@@ -61,7 +61,7 @@ jail_opts=(
 if [ "$net_isolate" -eq 1 ]; then
   jail_opts+=( --net=none )
 else
-  echo "⚠ 已放开网络: 样本会以你的网络身份对外发流量(可扫描/攻击内网、当跳板)。" >&2
+  echo "⚠ network enabled: the sample can send traffic as you (scan/attack the LAN, act as a pivot)." >&2
 fi
 
 export DEBUGINFOD_URLS=

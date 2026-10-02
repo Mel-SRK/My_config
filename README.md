@@ -307,8 +307,7 @@ gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
 备份路径: `local/bin/`
 
-做题/比赛时会往本机扔来路不明的二进制（题目附件、别人的 exp、AWD 里对手放的样本），直接跑等于把家目录、密钥、网络身份一起交出去。`ctfdbg`/`ctfrun` 是 firejail 包装器：默认只让样本看到**它所在的当前目录**，其余按下表逐项收紧；需要联网时显式加 `-n`。选 firejail 而不是 docker 的理由：启动开销 +160ms/次、没有常驻守护进程、调试零摩擦（docker 要挂 ptrace 能力），而本机用户已在 `docker` 组（等价事实 root），守护面更大。
-
+做题/比赛时会往本机扔来路不明的二进制（题目附件、别人的 exp、AWD 里对手放的样本），直接跑等于把家目录、密钥、网络身份一起交出去。`ctfdbg`/`ctfrun` 是 firejail 包装器：默认只让样本看到**它所在的当前目录**，其余按下表逐项收紧；需要联网时显式加 `-n`。
 ### 文件说明
 
 | 备份路径 | 安装路径 | 说明 |
@@ -356,7 +355,7 @@ ctfrun -n ./chall             # 放开网络（见下）
 
 系统目录（`/usr` `/lib` `/etc`）仍然可见但只读 —— 动态链接的程序必须读到 libc / ld.so 才能跑，把它们也藏起来程序根本起不来；上级路径存在但为空，是 firejail 白名单的实现方式，不是漏洞。
 
-### 恢复方式
+### 安装方式
 
 ```shell
 sudo pacman -S firejail pwndbg         # 依赖
@@ -364,15 +363,7 @@ cp local/bin/ctfdbg local/bin/ctfrun ~/.local/bin/
 chmod +x ~/.local/bin/ctfdbg ~/.local/bin/ctfrun
 ```
 
-### 踩坑记录
-
-- **交互式调试被挂起**：沙箱有自己的 PID namespace，进程组组长在 namespace 之外，框内 `getpgrp()` 读到 0 → gdb 的作业控制记账错乱：接管终端时挨 SIGTTOU（zsh 报 `suspended (tty output)`），之后一读键盘挨 SIGTTIN（报 `suspended (tty input)`）。修法两步：脚本里先 `trap '' TTOU`，再用**同一个进程**（不能 fork 子进程 —— 子进程当组长、退出后这个组就空了，症状原样回来）`setpgid` + `tcsetpgrp` 接管终端，然后 exec 调试器。
-- **`--net=<网卡>` / `--netfilter` 在本机不可用**（本想做"只放行题目服务器 IP"那一档）：wifi 驱动不支持 macvlan（`RTNETLINK answers: Operation not supported`），且新建的网络命名空间里 `iptables-restore` 报 `RULE_APPEND failed`。所以只有"断网 / 联网"两档，没有中间档。
-- **`ctfrun demo` 报 `PermissionError` 不是权限问题**：`execvp` 在 PATH 里遇到不可遍历的目录（如 `~/.hermes` 下的 skeleton 目录）时，会把"没这个命令"报成权限错误。脚本现在自己先判定是"找不到"还是"没有执行位"再报错。
-- **别在 `~` 或 `/` 里跑**：白名单=当前目录，在 `~` 下跑等于把整个家目录交给样本（脚本会直接拒绝并提示）。
-- 用 `--whitelist=$HOME/.gdbinit` 也能让 gdb 加载 pwndbg，但要多暴露一个家目录文件；这里改用 `/usr/bin/pwndbg` 包装器（沙箱里系统目录本来就可见）。
-
-### 安全性边界（别指望它挡住的）
+### 安全性边界
 
 - 和 docker 同一批内核机制（namespace + seccomp + caps），**挡不住内核 0day**；
 - 沙箱内仍能看到 `/etc` 下的只读配置和当前目录里的一切；
