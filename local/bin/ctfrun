@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# ctfrun —— 用 firejail 沙箱跑当前目录里的样本或任意命令
+#
+# 用法:
+#   ctfrun demo                 # 跑 ./demo（裸文件名会自动补 ./）
+#   ctfrun ./chall              # 等价写法
+#   ctfrun python3 exp.py       # 在沙箱里跑你的 exp
+#   ctfrun checksec ./chall     # 任何命令都行
+#   ctfrun bash                 # 进沙箱看内部：mount / capsh --print / ls ~
+#   ctfrun -n ./chall           # 放开网络（见下方"网络"说明）
+#
+# 选项（必须放在命令前面）:
+#   -n, --net     不隔离网络命名空间 = 共享宿主网络栈，样本可联网
+#   --no-net      完全断网（默认）
+#   -h, --help    显示帮助
+#
+# 网络: 默认 --net=none（只有 lo）。放开网络意味着样本会用"你的网络身份"对外
+#       发流量（扫描/攻击内网、当跳板都会被追溯到你的链路），只在题目确实需要
+#       连服务器时用。注意 firejail 的 --net=<网卡>/--netfilter 在本机不可用
+#       （wifi 驱动不支持 macvlan，见 README 踩坑记录），所以只有"断网/联网"
+#       两档，没有中间档。
+#
+# 隔离: 家目录换成空 tmpfs，只注入"当前目录" -> 看不到 ~/.ssh、~/.hermes、
+#       ~/Documents；无 DBus/声音/3D；丢光 capability；禁止 setuid 提权；
+#       seccomp 过滤危险 syscall；进程数上限 2000。系统目录(/usr /lib /etc)
+#       仍可见但不可写——否则动态链接的程序跑不起来。
+
+set -euo pipefail
+
+usage() {
+  sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+net_isolate=1
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -n|--net)   net_isolate=0; shift ;;
+    --no-net)   net_isolate=1; shift ;;
+    -h|--help)  usage; exit 0 ;;
+    *)          break ;;
+  esac
+done
+
+sandbox_pwd="$(pwd -P)"
+
+case "$sandbox_pwd" in
+  "$HOME"|"/")
+    echo "✗ 不要在 $sandbox_pwd 里跑: 白名单=当前目录, 在这里跑样本能看到整个家目录。" >&2
+    echo "  请先 cd 到专门的样本目录(例如 ~/samples/bin/<题目>)。" >&2
+    exit 1 ;;
+  /tmp|/var/tmp|/dev/shm)
+    echo "⚠ 当前目录是世界可写的共享目录, 任何人都能往里放文件。" >&2 ;;
+esac
+
+jail_opts=(
+  --whitelist="$sandbox_pwd"
+  --private-tmp
+  --private-dev
+  --nodbus
+  --nosound
+  --no3d
+  --caps.drop=all
+  --nonewprivs
+  --seccomp
+  --rlimit-nproc=2000
+  --allow-debuggers
+  --quiet
+)
+
+if [ "$net_isolate" -eq 1 ]; then
+  jail_opts+=( --net=none )
+else
+  echo "⚠ 已放开网络: 样本会以你的网络身份对外发流量(可扫描/攻击内网、当跳板)。" >&2
+fi
+
+[ "$#" -eq 0 ] && set -- ./chall
+
+export DEBUGINFOD_URLS=
+
+# 终端 + 进程组: 沙箱的 PID namespace 让 getpgrp() 读到 0，gdb 之类的交互程序会
+# 被 SIGTTOU/SIGTTIN 挂起。先忽略 TTOU，再用同一个进程接管终端后 exec。
+trap '' TTOU
+
+exec firejail "${jail_opts[@]}" python3 -c '
+import os, shutil, sys
+
+args = sys.argv[1:]
+# 裸文件名补 ./(execvp 不会在当前目录找): demo -> ./demo
+if args and not args[0].startswith("-") and "/" not in args[0] and os.path.exists(args[0]):
+    if not os.access(args[0], os.X_OK):
+        sys.exit("✗ %s 存在但没有执行位 -> chmod +x %s" % (args[0], args[0]))
+    args[0] = "./" + args[0]
+
+def fail(msg):
+    sys.exit(msg)
+
+# 先自己判定"找不到"，别让 execvp 的 EACCES 把两种情况混成一句
+# (PATH 里若存在不可遍历的目录，execvpe 会把"没这个命令"报成 PermissionError)
+if "/" in args[0]:
+    if not os.path.exists(args[0]):
+        fail("✗ 找不到 %s" % args[0])
+    if not os.access(args[0], os.X_OK):
+        fail("✗ %s 存在但没有执行位 -> chmod +x %s" % (args[0], args[0]))
+else:
+    if shutil.which(args[0]) is None:
+        fail("✗ 找不到 %s: 当前目录没有 ./%s，PATH 里也没有" % (args[0], args[0]))
+
+if os.isatty(0):
+    try:
+        os.setpgid(0, 0)
+        os.tcsetpgrp(0, os.getpgrp())
+    except OSError:
+        pass
+
+try:
+    os.execvp(args[0], args)
+except OSError as e:
+    fail("✗ 启动 %s 失败: %s" % (args[0], e))
+' "$@"

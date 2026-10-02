@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# ctfdbg —— 在 firejail 沙箱里用 pwndbg 调试当前目录的样本
+#
+# 用法:
+#   ctfdbg demo                   # 用 pwndbg 打开 ./demo（裸文件名自动补 ./）
+#   ctfdbg ./chall                # 等价写法
+#   ctfdbg ./chall -ex 'b *main'  # 额外参数原样传给 gdb
+#   ctfdbg                        # 不给参数直接进 gdb，进去后 file ./chall
+#   ctfdbg -n ./chall             # 放开网络
+#
+# 选项（必须放在最前面）:
+#   -n, --net     共享宿主网络栈 = 样本可联网（默认断网）
+#   --no-net      完全断网（默认）
+#   -h, --help    显示帮助
+#
+# 隔离与网络说明见 ctfrun 的头部注释（两者参数完全一致）。
+# 终端部分见下方注释：不处理会让 pwndbg 被 SIGTTOU/SIGTTIN 挂起。
+
+set -euo pipefail
+
+usage() {
+  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+net_isolate=1
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -n|--net)   net_isolate=0; shift ;;
+    --no-net)   net_isolate=1; shift ;;
+    -h|--help)  usage; exit 0 ;;
+    *)          break ;;
+  esac
+done
+
+sandbox_pwd="$(pwd -P)"
+
+case "$sandbox_pwd" in
+  "$HOME"|"/")
+    echo "✗ 不要在 $sandbox_pwd 里跑: 白名单=当前目录, 在这里跑样本能看到整个家目录。" >&2
+    echo "  请先 cd 到专门的样本目录(例如 ~/samples/bin/<题目>)。" >&2
+    exit 1 ;;
+  /tmp|/var/tmp|/dev/shm)
+    echo "⚠ 当前目录是世界可写的共享目录, 任何人都能往里放文件。" >&2 ;;
+esac
+
+jail_opts=(
+  --whitelist="$sandbox_pwd"
+  --private-tmp
+  --private-dev
+  --nodbus
+  --nosound
+  --no3d
+  --caps.drop=all
+  --nonewprivs
+  --seccomp
+  --rlimit-nproc=2000
+  --allow-debuggers
+  --quiet
+)
+
+if [ "$net_isolate" -eq 1 ]; then
+  jail_opts+=( --net=none )
+else
+  echo "⚠ 已放开网络: 样本会以你的网络身份对外发流量(可扫描/攻击内网、当跳板)。" >&2
+fi
+
+export DEBUGINFOD_URLS=
+
+# —— 终端归属(别删) ——
+# 沙箱的 PID namespace 让 getpgrp() 读到 0，gdb 的作业控制记账错乱: 接管终端时
+# 被 SIGTTOU 停住(zsh 报 "suspended (tty output)")，之后一读键盘又被 SIGTTIN
+# 停住(报 "suspended (tty input)")。修法两步:
+#   1) trap '' TTOU —— 被忽略的信号沿 exec 链继承，让 tcsetpgrp 能成功;
+#   2) 用同一个进程把自己变成进程组组长并接管终端，然后 exec 调试器。若让 fork
+#      出来的子进程当组长，它一退出这个组就空了，症状原样回来。
+trap '' TTOU
+
+exec firejail "${jail_opts[@]}" python3 -c '
+import os, sys
+
+args = sys.argv[1:]
+# 裸文件名补 ./: demo -> ./demo
+if args and not args[0].startswith("-") and "/" not in args[0] and os.path.exists(args[0]):
+    if not os.access(args[0], os.X_OK):
+        sys.exit("✗ %s 存在但没有执行位 -> chmod +x %s" % (args[0], args[0]))
+    args[0] = "./" + args[0]
+
+if args and "/" in args[0] and not os.path.exists(args[0]):
+    sys.exit("✗ 找不到 %s" % args[0])
+
+if os.isatty(0):
+    try:
+        os.setpgid(0, 0)
+        os.tcsetpgrp(0, os.getpgrp())
+    except OSError:
+        pass
+
+try:
+    os.execvp("pwndbg", ["pwndbg"] + args)
+except FileNotFoundError:
+    sys.exit("✗ 找不到 pwndbg")
+except OSError as e:
+    sys.exit("✗ 启动 pwndbg 失败: %s" % e)
+' "$@"
