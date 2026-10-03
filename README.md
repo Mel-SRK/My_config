@@ -176,6 +176,7 @@ niri msg outputs
 - `mobile` profile 中必须显式写 `enable`，否则 kanshi 可能匹配 mobile 但无法重新启用被关闭过的 `eDP-1`。
 - kanshi 判断的是显示器物理连接状态：DP 线仍插着时会保持外接屏模式；拔掉 DP 线才会恢复内屏。
 - 旧方案 `niri-auto-edp/` 保留为 fallback/历史方案。它基于脚本监听热插拔并调用 `niri msg`，不作为当前推荐方案。除非 kanshi 在未来版本中失效，否则优先使用 kanshi。
+- 2026-10-03：并行的 `niri-internal-off.py`（2 秒轮询 sysfs 的守护脚本）已停用，本机只保留 kanshi 一条链路——实测拔线恢复全部由 kanshi 完成，守护脚本仅剩常驻开销和一个"外接输出被关时连内屏一起熄"的风险。归档与恢复方式见 `niri-internal-off/README.md`。
 
 ## ~~swayidle 自动锁屏配置~~ (已废弃)
 

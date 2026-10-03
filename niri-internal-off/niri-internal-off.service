@@ -1,0 +1,19 @@
+[Unit]
+Description=外接显示器接入时自动熄灭内屏 eDP-1
+Documentation=file:%h/.local/bin/niri-internal-off.py
+After=niri.service graphical-session.target
+PartOf=niri.service
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/niri-internal-off.py
+Restart=on-failure
+RestartSec=3
+Nice=10
+# 日志走 journal：journalctl --user -u niri-internal-off.service
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target
