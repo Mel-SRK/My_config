@@ -44,13 +44,13 @@ fi
 
 ## tmux
 
-默认前置快捷键为：**Ctrl-x**
+默认前置快捷键为：**Alt-n**（唯一前缀；旧前缀 Ctrl-x / Ctrl-b 已停用，连按两次透传字面 Alt+n）
 
-新建窗口：**Ctrl-x**+c
+新建窗口：**Alt-n**+c
 
-横向分割窗口：**Ctrl-x**+-
+横向分割窗口：**Alt-n**+-
 
-纵向分割窗口：**Ctrl-x**+—
+纵向分割窗口：**Alt-n**+—
 
 默认开启鼠标支持，鼠标拖动选中文本后松开即可复制至系统剪切板
 
@@ -119,11 +119,11 @@ Mod+T打开终端
 
 ~~Mod+B打开nwg-clipman(剪切板管理工具)~~
 
-Mod+B打开 Noctalia v5 剪贴板面板（`noctalia msg panel-toggle clipboard`）
+Alt+D打开 Noctalia v5 剪贴板面板（`noctalia msg panel-toggle clipboard`）
 
 ~~Mod+D启动fuzzel //主题配置参考https://draculatheme.com/fuzzel~~
 
-Mod+D打开 Noctalia v5 启动器（`noctalia msg panel-toggle launcher`）
+Alt+Space打开 Noctalia v5 启动器（`noctalia msg panel-toggle launcher`）
 
 Super+Alt+L 锁屏（`noctalia msg session lock`）
 
@@ -232,7 +232,7 @@ chmod +x ~/.local/bin/sddm-sync-wallpaper.sh
 
 - `~/.local/state/noctalia/settings.toml` 会盖掉 `config.toml`。声明式值“不生效”时先 grep 这份 state。
 - overview 壁纸要 **backdrop.enabled=true（config 和 state 都要）** + niri `match namespace="^noctalia-backdrop"`。v4 的 `^noctalia-overview*` 在 v5 是空匹配。
-- Win+B 必须是 `panel-toggle clipboard`，不是 launcher。
+- Alt+D 必须是 `panel-toggle clipboard`，不是 launcher。
 - v4 QML 插件和 `~/.config/noctalia/quickshell/` overlay 对 v5 无效。
 - noctalia-hermes 插件（v4）在 `~/Git_Program/noctalia-hermes/`，v5 不能直接用。
 

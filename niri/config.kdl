@@ -152,9 +152,9 @@ binds {
     Alt+A { screenshot; }
     Ctrl+Alt+Right hotkey-overlay-title="Media Next" { spawn "noctalia" "msg" "media" "next"; }
     Ctrl+Alt+Left hotkey-overlay-title="Media Previous" { spawn "noctalia" "msg" "media" "previous"; }
-    Mod+B hotkey-overlay-title="Clipboard" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
+    Alt+D hotkey-overlay-title="Clipboard" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
     Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
-    Mod+D hotkey-overlay-title="Run an Application: launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Alt+Space hotkey-overlay-title="Run an Application: launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "noctalia" "msg" "session" "lock"; }
 
     // Volume
