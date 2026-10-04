@@ -24,7 +24,7 @@ ln -s ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
 如想实现再次打开终端继续使用上次的shell,可将虚拟终端程序的启动shell改为`tmux a`(图片以kde的Konsole为例)
 ~~建议的sddm主题:[qylock](https://github.com/darkkal44/qylock)~~
 
-建议的sddm主题:[noctalia-sddm-theme](https://github.com/mda-dev/noctalia-sddm-theme)（unofficial，与 Noctalia v5 配色/壁纸同步；官方 v5 greeter 是 greetd 的 noctalia-greeter，本机仍用 SDDM）
+登录界面：2026-09-22 起为 greetd + `noctalia-greeter`（配置 `/etc/greetd/config.toml`），`sddm` 已 disabled。下方便携的 unofficial SDDM 主题（noctalia-sddm-theme）仅作回滚记录。
 
 ![预览图片2.png](./预览图片2.png)
 
@@ -178,6 +178,30 @@ niri msg outputs
 - 旧方案 `niri-auto-edp/` 保留为 fallback/历史方案。它基于脚本监听热插拔并调用 `niri msg`，不作为当前推荐方案。除非 kanshi 在未来版本中失效，否则优先使用 kanshi。
 - 2026-10-03：并行的 `niri-internal-off.py`（2 秒轮询 sysfs 的守护脚本）已停用，本机只保留 kanshi 一条链路——实测拔线恢复全部由 kanshi 完成，守护脚本仅剩常驻开销和一个"外接输出被关时连内屏一起熄"的风险。归档与恢复方式见 `niri-internal-off/README.md`。
 
+## 登录黑屏自救（recover-niri-desktop.sh）
+
+`niri.service` 在 user manager 里还活着、但 DRM 已失去权限（孤儿进程）时，重新登录会被 niri-session 的「already running」守卫挡掉，屏幕上什么都没有。脚本清掉孤儿再用当前 tty 重新拉起会话，不需要 root。
+
+### 文件说明
+
+| 备份路径 | 安装路径 | 说明 |
+|---|---|---|
+| `local/bin/recover-niri-desktop.sh` | `~/.local/bin/recover-niri-desktop.sh` | 停掉孤儿 niri，用当前 tty 重新拉起会话 |
+| `systemd/user/login-timer.service` | `~/.config/systemd/user/login-timer.service` | 记录 niri 启动时刻到 `/tmp/login-time.log`，用于量化登录延迟 |
+| `niri/scripts/startup-marker.sh` | `~/.config/niri/scripts/startup-marker.sh` | 记录 swaybg 启动时刻，同上（当前无引用，留作诊断） |
+
+### 恢复方式
+
+```shell
+mkdir -p ~/.local/bin ~/.config/systemd/user ~/.config/niri/scripts
+cp local/bin/recover-niri-desktop.sh ~/.local/bin/ && chmod +x ~/.local/bin/recover-niri-desktop.sh
+cp systemd/user/login-timer.service ~/.config/systemd/user/
+cp niri/scripts/startup-marker.sh ~/.config/niri/scripts/ && chmod +x ~/.config/niri/scripts/startup-marker.sh
+systemctl --user daemon-reload
+```
+
+用法：Ctrl+C 连按三次清空行、确认不在 tmux 里，然后跑 `recover-niri-desktop.sh`。
+
 ## ~~swayidle 自动锁屏配置~~ (已废弃)
 
 > **2026-06-23**: noctalia-shell 已原生支持空闲管理（idle timeout + lock + monitor power），
@@ -201,9 +225,9 @@ niri msg outputs
 |---|---|---|
 | `niri/config.kdl` | `~/.config/niri/config.kdl` | v5 启动、快捷键、overview layer-rule `^noctalia-backdrop` |
 | `niri/noctalia.kdl` | `~/.config/niri/noctalia.kdl` | niri 边框/焦点色（当前 GitHub Dark） |
-| `noctalia/config.toml` | `~/.config/noctalia/config.toml` | 声明式：backdrop、SDDM user template、wallpaper hook |
+| `noctalia/config.toml` | `~/.config/noctalia/config.toml` | 声明式：backdrop、启动器/剪贴板面板内的 Tab↔Up/Down 键位 |
 | `noctalia/settings.toml` | `~/.local/state/noctalia/settings.toml` | GUI/运行时状态，**优先级高于 config.toml** |
-| `local/bin/sddm-sync-wallpaper.sh` | `~/.local/bin/sddm-sync-wallpaper.sh` | v5 `wallpaper_changed` hook，拷当前壁纸到 SDDM 主题 |
+| `local/bin/sddm-sync-wallpaper.sh` | ~~`~/.local/bin/sddm-sync-wallpaper.sh`~~ | SDDM 时代壁纸 hook；2026-09-22 换 greetd 后已从实机移除，仅存历史 |
 
 v4 历史（不要部署到 v5）：`noctalia/settings.json`、`noctalia/plugins/`、`noctalia/quickshell/`。
 
@@ -212,21 +236,19 @@ v4 历史（不要部署到 v5）：`noctalia/settings.json`、`noctalia/plugins
 ```shell
 sudo pacman -S noctalia
 # 若仍装着 AUR 旧包：sudo pacman -Rns noctalia-shell noctalia-qs
-mkdir -p ~/.config/noctalia ~/.local/state/noctalia ~/.local/bin
+mkdir -p ~/.config/noctalia ~/.local/state/noctalia
 cp niri/config.kdl ~/.config/niri/config.kdl
 cp niri/noctalia.kdl ~/.config/niri/noctalia.kdl
 cp noctalia/config.toml ~/.config/noctalia/config.toml
 cp noctalia/settings.toml ~/.local/state/noctalia/settings.toml
-cp local/bin/sddm-sync-wallpaper.sh ~/.local/bin/sddm-sync-wallpaper.sh
-chmod +x ~/.local/bin/sddm-sync-wallpaper.sh
 # 然后注销或 `niri msg action load-config-file`，确认 `pgrep -a noctalia`
 ```
 
-### SDDM 配色/壁纸同步（仍用 unofficial 主题，不换 greetd）
+### ~~SDDM 配色/壁纸同步~~（已废弃：2026-09-22 换 greetd + noctalia-greeter）
 
-- 配色：`config.toml` 里 `[theme.templates.user.sddm]`，改配色后 `noctalia msg templates-apply`
-- 壁纸：`[hooks] wallpaper_changed` 指向 `sddm-sync-wallpaper.sh`（读 `NOCTALIA_WALLPAPER_PATH`，不再读 v4 的 `~/.cache/noctalia/wallpapers.json`）
-- `theme.conf` 需对用户可写（现为 `srk:srk 666`）
+- 旧配色链路：`config.toml` 的 `[theme.templates.user.sddm]` + `noctalia msg templates-apply`
+- 旧壁纸链路：`[hooks] wallpaper_changed` 指向 `sddm-sync-wallpaper.sh`（读 `NOCTALIA_WALLPAPER_PATH`）
+- 两条链路随 SDDM 一起作废；greetd 的配色/壁纸同步走 `noctalia-greeter`（见技能 `niri-noctalia-config` 的 `references/noctalia-greeter.md`）
 
 ### 注意
 
@@ -303,6 +325,17 @@ gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 ```
 
 当前会话可先：`systemctl --user set-environment GTK_THEME=Adwaita:dark`，然后完全退出并重开 Obsidian/Sidra。
+
+## Java / X11 应用的 Wayland 适配
+
+### 文件说明
+
+| 备份路径 | 原始路径 | 说明 |
+|---|---|---|
+| `environment.d/java-awt.conf` | `~/.config/environment.d/java-awt.conf` | `_JAVA_AWT_WM_NONREPARENTING=1`，治非重父化合成器下 Swing/AWT 窗口空白 |
+| `environment.d/xwayland-satellite.conf` | `~/.config/environment.d/xwayland-satellite.conf` | `DISPLAY=:0`，让 HMCL 等 X11 应用找到 xwayland-satellite |
+
+`environment.d/` 只对重新登录后 niri 启动的应用生效；当前会话可用 `systemctl --user set-environment` 临时补。
 
 ## CTF 样本沙箱（ctfdbg / ctfrun）
 

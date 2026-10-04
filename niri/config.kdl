@@ -10,7 +10,7 @@
 environment {
 }
 
-spawn-at-startup "swaybg" "-i" "/home/srk/Pictures/wallhaven/wallhaven-6lwe67.jpg" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg" "-m" "fill"
 spawn-at-startup "noctalia"
 window-rule {
     geometry-corner-radius 20
@@ -60,15 +60,16 @@ output "eDP-1" {
     scale 1.35
     transform "normal"
     variable-refresh-rate
-    focus-at-startup
-    position x=0 y=0
+    position x=2560 y=0
 }
 
 // Output configuration — 外接显示器 HKC G27H2Max (2560x1440@200Hz)
+// 内屏 eDP-1 由 niri-internal-off.service 在外接接入时自动熄灭
 output "DP-1" {
     mode "2560x1440@200"
     scale 1
     transform "normal"
+    focus-at-startup
     position x=0 y=0
 }
 
@@ -131,6 +132,13 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
+}
+
+// fcitx X11 候选框被 niri 当普通平铺窗口抢焦点，微信里切输入法就会闪一下然后打不了中文
+window-rule {
+    match app-id="^fcitx$" title="^Fcitx5 Input Window$"
+    open-floating true
+    open-focused false
 }
 
 /-window-rule {

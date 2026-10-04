@@ -5,19 +5,21 @@ ui_scale = 1.1500000096857548
 
 [audio]
 enable_sounds = true
-notification_sound = "/home/srk/Music/通知音效/dragon-studio-new-notification-3-398649.mp3"
+sound_volume = 0.99999997764825821
 
 [backdrop]
 enabled = true
 
 [bar.default]
 background_opacity = 0.79999998211860657
+capsule = true
+capsule_opacity = 0.79999998211860657
 center = [ "workspaces" ]
 contact_shadow = true
-end = [ "tray", "volume", "clipboard", "brightness", "battery", "notifications", "clock" ]
+end = [ "network", "tray", "volume", "brightness", "battery", "clock", "notifications" ]
 margin_ends = 0
 radius = 0
-start = [ "active_window", "sysmon", "media" ]
+start = [ "sysmon", "ram", "media" ]
 
 [battery]
 warning_threshold = 20
@@ -30,7 +32,12 @@ enabled = true
 
 [desktop_widgets]
 schema_version = 2
-widget_order = [ "desktop-widget-0000000000000001", "desktop-widget-0000000000000002", "desktop-widget-0000000000000003" ]
+widget_order = [
+    "desktop-widget-0000000000000001",
+    "desktop-widget-0000000000000002",
+    "desktop-widget-0000000000000003",
+    "desktop-widget-0000000000000004"
+]
 
     [desktop_widgets.grid]
     cell_size = 16
@@ -38,48 +45,95 @@ widget_order = [ "desktop-widget-0000000000000001", "desktop-widget-000000000000
     visible = true
 
     [desktop_widgets.widget.desktop-widget-0000000000000001]
-    box_height = 0.0
-    box_width = 0.0
-    cx = 162.5
-    cy = 139.0
+    box_height = 160.0
+    box_width = 368.0
+    cx = 2320.0
+    cy = 160.0
     output = "DP-1"
     placement_height = 1440.0
     placement_width = 2560.0
     rotation = 0.0
     type = "clock"
 
+        [desktop_widgets.widget.desktop-widget-0000000000000001.settings]
+        clock_style = "digital"
+
     [desktop_widgets.widget.desktop-widget-0000000000000002]
-    box_height = 112.0
-    box_width = 256.0
-    cx = 192.0
-    cy = 296.0
+    box_height = 160.0
+    box_width = 368.0
+    cx = 2320.0
+    cy = 384.0
     output = "DP-1"
     placement_height = 1440.0
     placement_width = 2560.0
     rotation = 0.0
     type = "weather"
 
+        [desktop_widgets.widget.desktop-widget-0000000000000002.settings]
+        show_forecast = false
+
     [desktop_widgets.widget.desktop-widget-0000000000000003]
-    box_height = 0.0
-    box_width = 0.0
-    cx = 418.70001220703125
-    cy = 1132.25
+    box_height = 416.0
+    box_width = 624.0
+    cx = 2184.0
+    cy = 1072.0
     output = "DP-1"
     placement_height = 1440.0
     placement_width = 2560.0
     rotation = 0.0
     type = "calendar"
 
+    [desktop_widgets.widget.desktop-widget-0000000000000004]
+    box_height = 192.0
+    box_width = 432.0
+    cx = 2280.0
+    cy = 656.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "audio_visualizer"
+
+        [desktop_widgets.widget.desktop-widget-0000000000000004.settings]
+        bands = 32
+        show_when_idle = true
+
+[idle]
+behavior_order = [ "lock", "screen-off", "lock-and-suspend" ]
+pre_action_fade_seconds = 5
+
+    [idle.behavior.lock]
+    action = "lock"
+    enabled = true
+    timeout = 600.0
+
+    [idle.behavior.lock-and-suspend]
+    action = "lock_and_suspend"
+    enabled = true
+    timeout = 900.0
+
+    [idle.behavior.screen-off]
+    action = "screen_off"
+    enabled = true
+    timeout = 660.0
+
 [location]
 address = "德安县"
 
 [lockscreen]
 blur_intensity = 0.19999999552965164
+blurred_desktop = true
 
 [lockscreen_widgets]
 enabled = true
 schema_version = 2
-widget_order = [ "lockscreen-login-box@DP-1" ]
+widget_order = [
+    "lockscreen-login-box@eDP-1",
+    "lockscreen-login-box@DP-1",
+    "lockscreen-widget-0000000000000001",
+    "lockscreen-widget-0000000000000002",
+    "lockscreen-widget-0000000000000003"
+]
 
     [lockscreen_widgets.grid]
     cell_size = 16
@@ -90,7 +144,7 @@ widget_order = [ "lockscreen-login-box@DP-1" ]
     box_height = 196.0
     box_width = 810.0
     cx = 1280.0
-    cy = 1258.0
+    cy = 1074.0
     output = "DP-1"
     placement_height = 1440.0
     placement_width = 2560.0
@@ -113,21 +167,90 @@ widget_order = [ "lockscreen-login-box@DP-1" ]
         show_unlock_hint = true
         show_weather = true
 
-[osd]
-background_opacity = 0.86999998055398464
-border = false
-position = "top_right"
-position_vertical = "top_right"
+    [lockscreen_widgets.widget."lockscreen-login-box@eDP-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 830.001220703125
+    cy = 854.99993896484375
+    output = "eDP-1"
+    placement_height = 1037.0
+    placement_width = 1659.0
+    rotation = 0.0
+    type = "login_box"
 
-    [osd.kinds]
-    keyboard_layout = false
+        [lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget.lockscreen-widget-0000000000000001]
+    box_height = 304.0
+    box_width = 672.0
+    cx = 1272.0
+    cy = 200.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "clock"
+
+        [lockscreen_widgets.widget.lockscreen-widget-0000000000000001.settings]
+        background = false
+
+    [lockscreen_widgets.widget.lockscreen-widget-0000000000000002]
+    box_height = 144.0
+    box_width = 288.0
+    cx = 912.0
+    cy = 856.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "weather"
+
+        [lockscreen_widgets.widget.lockscreen-widget-0000000000000002.settings]
+        background = false
+
+    [lockscreen_widgets.widget.lockscreen-widget-0000000000000003]
+    box_height = 144.0
+    box_width = 592.0
+    cx = 1640.0
+    cy = 840.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "sysmon"
+
+        [lockscreen_widgets.widget.lockscreen-widget-0000000000000003.settings]
+        background = false
+        stat = "cpu_usage"
+        stat2 = "cpu_temp"
+
+[notification]
+border = false
+
+[osd.kinds]
+keyboard_layout = false
 
 [plugins]
 auto_update = "all"
-enabled = [ "noctalia/wallhaven" ]
+enabled = []
 
 [shell]
 avatar_path = "/home/srk/Pictures/头像.png"
+external_ip_enabled = true
 launch_apps_as_systemd_services = true
 panel_anchor_bar = "default"
 password_style = "random"
@@ -136,18 +259,21 @@ screen_time_enabled = true
     [shell.animation]
     speed = 1.1000000163912773
 
+    [shell.greeter_sync]
+    auto_sync = true
+
     [shell.launcher]
     categories = false
     show_app_origin_indicator = false
 
     [shell.panel]
-    floating_layer = "top"
     open_near_click_control_center = true
     transparency_mode = "soft"
 
     [shell.screenshot]
     directory = "/home/srk/Pictures"
     remember_last_region = true
+    show_cursor = true
 
     [shell.shadow]
     direction = "center"
@@ -158,6 +284,7 @@ screen_time_enabled = true
 [theme]
 builtin = "Ayu"
 community_palette = "GitHub Dark"
+mode = "dark"
 source = "community"
 wallpaper_scheme = "m3-content"
 
@@ -182,7 +309,7 @@ wallpaper_scheme = "m3-content"
 
 [wallpaper]
 directory = "/home/srk/Pictures/wallhaven"
-transition = [ "fade", "wipe", "zoom" ]
+transition = [ "disc", "fade", "honeycomb", "stripes", "wipe", "zoom" ]
 transition_on_startup = true
 
     [wallpaper.automation]
@@ -190,13 +317,16 @@ transition_on_startup = true
     interval_seconds = 600
 
     [wallpaper.default]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
 
     [wallpaper.last]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
 
     [wallpaper.monitors.DP-1]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
+
+    [wallpaper.monitors.eDP-1]
+    path = "/home/srk/Pictures/wallhaven/wallhaven-e872rw.png"
 
 [widget.battery]
 display_mode = "graphic"

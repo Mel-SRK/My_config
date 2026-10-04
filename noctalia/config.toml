@@ -3,11 +3,8 @@ enabled = true
 blur_intensity = 0.5
 tint_intensity = 0.3
 
-# SDDM (unofficial mda-dev theme) color sync — v5 user template.
-# v4 used user-templates.toml [templates.sddm]; that section is ignored now.
-[theme.templates.user.sddm]
-input_path = "/usr/share/sddm/themes/noctalia/theme.template.conf"
-output_path = "/usr/share/sddm/themes/noctalia/theme.conf"
-
-[hooks]
-wallpaper_changed = ["/home/srk/.local/bin/sddm-sync-wallpaper.sh"]
+# v5 launcher/clipboard ignore TabNext/TabPrevious; map Tab onto Up/Down instead.
+# Restore: cp ~/.config/noctalia/config.toml.bak-keybinds-20260907 ~/.config/noctalia/config.toml
+[keybinds]
+down = ["Down", "Tab"]
+up = ["Up", "Shift+Tab", "ISO_Left_Tab", "Shift+ISO_Left_Tab"]
