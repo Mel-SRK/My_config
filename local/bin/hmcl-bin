@@ -1,0 +1,5 @@
+#!/bin/sh
+# HMCL on niri/Wayland via xwayland-satellite.
+export DISPLAY="${DISPLAY:-:0}"
+export _JAVA_AWT_WM_NONREPARENTING=1
+exec /usr/bin/java -Dprism.order=sw -jar /usr/share/java/hmcl-bin/hmcl-bin.jar "$@"

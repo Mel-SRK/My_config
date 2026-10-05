@@ -1,0 +1,15 @@
+[Unit]
+Description=Clash Verge Service helps to launch Clash Core.
+After=network-online.target nftables.service iptables.service
+
+[Service]
+Type=simple
+ExecStart=/var/lib/clash-verge-service/bin/clash-verge-service
+Group=srk
+Restart=always
+RestartSec=5
+RuntimeDirectory=clash-verge-service
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target

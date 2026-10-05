@@ -1,0 +1,12 @@
+#%PAM-1.0
+
+auth       required     pam_securetty.so
+auth       requisite    pam_nologin.so
+auth       include      system-local-login
+account    include      system-local-login
+session    include      system-local-login
+session    required     pam_systemd.so
+
+# pam-gnupg: store-only 只把登录密码存给 session 阶段预置，auth 阶段不自己认证
+auth        optional    pam_gnupg.so    store-only
+session     optional    pam_gnupg.so

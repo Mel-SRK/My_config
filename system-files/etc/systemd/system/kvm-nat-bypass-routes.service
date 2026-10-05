@@ -1,0 +1,11 @@
+[Unit]
+Description=KVM NAT bypass routes (avoid mihomo TUN hijack of virbr0 traffic)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kvm-nat-bypass-routes.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

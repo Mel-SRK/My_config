@@ -1,0 +1,13 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[user]
+	name = Mel-SRK
+	email = 3203216748@qq.com
+[http]
+	proxy = socks5://127.0.0.1:7897
+[https]
+	proxy = socks5://127.0.0.1:7897
