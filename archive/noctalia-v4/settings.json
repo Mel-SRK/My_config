@@ -343,52 +343,6 @@
                         "y": 48
                     }
                 ]
-            },
-            {
-                "name": "HDMI-A-1",
-                "widgets": [
-                    {
-                        "id": "Weather",
-                        "roundedCorners": true,
-                        "showBackground": true,
-                        "x": 27,
-                        "y": 243
-                    },
-                    {
-                        "clockColor": "none",
-                        "clockStyle": "digital",
-                        "customFont": "",
-                        "format": "HH:mm\\nd MMMM yyyy",
-                        "id": "Clock",
-                        "roundedCorners": true,
-                        "showBackground": true,
-                        "useCustomFont": false,
-                        "x": 27,
-                        "y": 54
-                    },
-                    {
-                        "hideMode": "visible",
-                        "id": "MediaPlayer",
-                        "roundedCorners": true,
-                        "showAlbumArt": true,
-                        "showBackground": true,
-                        "showButtons": true,
-                        "showVisualizer": true,
-                        "visualizerType": "linear",
-                        "x": 27,
-                        "y": 378
-                    },
-                    {
-                        "diskPath": "/",
-                        "id": "SystemStat",
-                        "layout": "bottom",
-                        "roundedCorners": true,
-                        "showBackground": true,
-                        "statType": "CPU",
-                        "x": 216,
-                        "y": 81
-                    }
-                ]
             }
         ],
         "overviewEnabled": true
@@ -505,7 +459,7 @@
     },
     "idle": {
         "customCommands": "[]",
-        "enabled": false,
+        "enabled": true,
         "fadeDuration": 5,
         "lockCommand": "",
         "lockTimeout": 660,
@@ -540,7 +494,7 @@
         "bluetoothRssiPollIntervalMs": 10000,
         "bluetoothRssiPollingEnabled": false,
         "disableDiscoverability": false,
-        "networkPanelView": "wifi",
+        "networkPanelView": "ethernet",
         "wifiDetailsViewMode": "grid"
     },
     "nightLight": {
@@ -553,7 +507,7 @@
         "nightTemp": "4000"
     },
     "noctaliaPerformance": {
-        "disableDesktopWidgets": true,
+        "disableDesktopWidgets": false,
         "disableWallpaper": true
     },
     "notifications": {
@@ -579,12 +533,12 @@
             "normal": true
         },
         "sounds": {
-            "criticalSoundFile": "",
-            "enabled": false,
+            "criticalSoundFile": "/home/srk/Music/通知音效/universfield-new-notification-010-352755.mp3",
+            "enabled": true,
             "excludedApps": "discord,firefox,chrome,chromium,edge",
-            "lowSoundFile": "",
-            "normalSoundFile": "",
-            "separateSounds": false,
+            "lowSoundFile": "/home/srk/Music/通知音效/universfield-new-notification-040-493469.mp3",
+            "normalSoundFile": "/home/srk/Music/通知音效/dragon-studio-new-notification-3-398649.mp3",
+            "separateSounds": true,
             "volume": 0.5
         }
     },
@@ -702,7 +656,11 @@
         "activeTemplates": [
             {
                 "enabled": true,
-                "id": "gtk"
+                "id": "btop"
+            },
+            {
+                "enabled": true,
+                "id": "alacritty"
             },
             {
                 "enabled": true,
@@ -714,19 +672,11 @@
             },
             {
                 "enabled": true,
-                "id": "alacritty"
-            },
-            {
-                "enabled": true,
                 "id": "kcolorscheme"
             },
             {
                 "enabled": true,
-                "id": "yazi"
-            },
-            {
-                "enabled": true,
-                "id": "btop"
+                "id": "gtk"
             }
         ],
         "enableUserTheming": true
@@ -760,7 +710,7 @@
             {
                 "directory": "/home/srk/Pictures/wallhaven",
                 "name": "eDP-1",
-                "wallpaper": ""
+                "wallpaper": "/home/srk/Pictures/wallhaven/wallhaven-6lwe67.jpg"
             }
         ],
         "overviewBlur": 0.4,
