@@ -64,7 +64,7 @@ output "eDP-1" {
 }
 
 // Output configuration — 外接显示器 HKC G27H2Max (2560x1440@200Hz)
-// 内屏 eDP-1 由 niri-internal-off.service 在外接接入时自动熄灭
+// 内屏 eDP-1 由 kanshi 在外接接入时熄灭（profile: docked / 移动），见 kanshi/config
 output "DP-1" {
     mode "2560x1440@200"
     scale 1

@@ -256,9 +256,6 @@ panel_anchor_bar = "default"
 password_style = "random"
 screen_time_enabled = true
 
-    [shell.animation]
-    speed = 1.1000000163912773
-
     [shell.greeter_sync]
     auto_sync = true
 
@@ -317,16 +314,16 @@ transition_on_startup = true
     interval_seconds = 600
 
     [wallpaper.default]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-ml2638.png"
 
     [wallpaper.last]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-ml2638.png"
 
     [wallpaper.monitors.DP-1]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-5ymlv9.png"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-poyvk3.png"
 
     [wallpaper.monitors.eDP-1]
-    path = "/home/srk/Pictures/wallhaven/wallhaven-e872rw.png"
+    path = "/home/srk/Pictures/wallhaven/wallhaven-ml2638.png"
 
 [widget.battery]
 display_mode = "graphic"
