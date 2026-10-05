@@ -1,0 +1,40 @@
+# 仓库路径	安装路径	权限	说明
+niri/config.kdl	~/.config/niri/config.kdl	user	niri 主配置：输出、键位、启动项
+niri/noctalia.kdl	~/.config/niri/noctalia.kdl	user	niri 焦点框/边框配色
+alacritty/	~/.config/alacritty/	user	终端 + noctalia 主题
+fontconfig/fonts.conf	~/.config/fontconfig/fonts.conf	user	字体渲染
+gtk-3.0/settings.ini	~/.config/gtk-3.0/settings.ini	user	GTK3 暗色
+gtk-4.0/settings.ini	~/.config/gtk-4.0/settings.ini	user	GTK4 暗色
+environment.d/	~/.config/environment.d/	user	登录级环境变量（重新登录生效）
+kanshi/config	~/.config/kanshi/config	user	外接屏 profile（docked / mobile）
+fcitx5/	~/.config/fcitx5/	user	输入法配置与 profile
+noctalia/config.toml	~/.config/noctalia/config.toml	user	noctalia v5 声明式配置
+noctalia/settings.toml	~/.local/state/noctalia/settings.toml	user	noctalia 运行时状态（GUI 改写、壁纸轮换，会漂）	state
+tmux/.tmux.conf	~/.config/tmux/.tmux.conf	user	oh-my-tmux 上游主文件，别直接改
+tmux/.tmux.conf.local	~/.config/tmux/.tmux.conf.local	user	本地自定义（前缀 Alt+n 等）
+tmux/tmux.sh	~/.config/tmux/tmux.sh	user	旧的开机自启脚本（当前未启用）
+nvim/	~/.config/nvim/	user	lazy.nvim + 原生 LSP
+home/.zshrc	~/.zshrc	user	shell 入口：oh-my-zsh、p10k、代理、tmux attach
+home/.bashrc	~/.bashrc	user	
+home/.bash_profile	~/.bash_profile	user	
+home/.gitconfig	~/.gitconfig	user	gh credential helper + socks5 代理
+home/.gdbinit	~/.gdbinit	user	加载 pwndbg
+p10k/.p10k.zsh	~/.p10k.zsh	user	powerlevel10k 提示符
+local/bin/ctfdbg	~/.local/bin/ctfdbg	user	沙箱里用 pwndbg 调样本
+local/bin/ctfrun	~/.local/bin/ctfrun	user	沙箱里跑任意命令
+local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
+micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
+micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务
+systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi 随图形会话启动
+systemd/user/hermes-gateway.service	~/.config/systemd/user/hermes-gateway.service	user	Hermes gateway 单元
+systemd/user/hermes-gateway.service.d/proxy.conf	~/.config/systemd/user/hermes-gateway.service.d/proxy.conf	user	gateway 走本机代理
+micmute-led/90-micmute-led.rules	/etc/udev/rules.d/90-micmute-led.rules	root	LED 文件权限
+system-files/etc/greetd/config.toml	/etc/greetd/config.toml	root	登录器（greetd + noctalia-greeter）
+system-files/etc/environment	/etc/environment	root	输入法环境变量
+system-files/etc/pacman.conf	/etc/pacman.conf	root	额外仓库（multilib / blackarch / archlinuxcn）
+system-files/etc/pam.d/greetd	/etc/pam.d/greetd	root	含 pam_gnupg 段（登录时预置 GPG passphrase）
+system-files/etc/systemd/system/clash-verge-service.service	/etc/systemd/system/clash-verge-service.service	root	Clash Verge 内核服务
+system-files/etc/systemd/system/kvm-nat-bypass-routes.service	/etc/systemd/system/kvm-nat-bypass-routes.service	root	KVM NAT 绕过 mihomo TUN
+system-files/etc/udev/rules.d/50-nuphy.rules	/etc/udev/rules.d/50-nuphy.rules	root	NuPhy 键盘 hidraw 权限
+system-files/etc/udev/rules.d/50-vgn-mouse.rules	/etc/udev/rules.d/50-vgn-mouse.rules	root	VGN 鼠标 hidraw 权限
+system-files/usr/local/sbin/kvm-nat-bypass-routes.sh	/usr/local/sbin/kvm-nat-bypass-routes.sh	root	上面那个 service 的脚本
