@@ -23,6 +23,15 @@ layer-rule {
   place-within-backdrop true
 }
 
+// 通知/OSD 不请求合成器模糊：模糊区域的边缘（底边、R角）只有 1-2px 露在卡片填充之外，
+// xray 默认 true + 全局 blur 默认 saturation 1.5 会把这条缝推成饱和纯色。niri #4268 判为 intended。
+layer-rule {
+  match namespace="^noctalia-(notification|osd)$"
+  background-effect {
+    blur false
+  }
+}
+
 debug {
     honor-xdg-activation-with-invalid-serial
 }
