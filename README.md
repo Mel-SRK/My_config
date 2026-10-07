@@ -33,7 +33,7 @@ niri（`Super` 即 Mod）：
 | 键 | 作用 |
 |---|---|
 | `Mod+T` | 终端 |
-| `Alt+Space` / `Alt+D` | Noctalia 启动器 / 剪贴板面板 |
+| `Mod+D` / `Mod+B` | Noctalia 启动器 / 剪贴板面板 |
 | `Super+Alt+L` | 锁屏；`Mod+O` overview |
 | `Mod+H/J/K/L` | 焦点：左/下/上/右（加 `Ctrl` 变成移动） |
 | `Mod+,` / `Mod+.` | 把右侧窗口并入当前列 / 把列底部窗口弹出为新列 |
@@ -44,7 +44,7 @@ niri（`Super` 即 Mod）：
 
 媒体键 `Ctrl+Alt+Left/Right` 或 `XF86AudioPrev/Next`，亮度走 `noctalia msg brightness-up/down`（不再用 brightnessctl）。
 
-tmux：前缀 `Alt+n`（连按两次透传字面 `Alt+n`）。新建窗口 `Alt+n` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
+tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 `Ctrl+b`）。新建窗口 `Ctrl+x` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
 
 nvim：
 
