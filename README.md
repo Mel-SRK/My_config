@@ -89,6 +89,8 @@ niri msg action load-config-file
 
 `environment.d/` 里的变量要重新登录才对 niri 启动的应用生效。
 
+greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装完都不需要重启 greetd：前者在 greetd 下次启动时读，后者每次认证都重读一遍。**不要在图形会话里跑 `systemctl restart greetd`** —— greeter 会去抢 `vt = 1`，把当前 niri 会话挤成 inactive：桌面消失、进程还在，再登录会被 `niri-session` 的 `A niri session is already running.` 挡在门外。真要立刻生效，等登出到登录界面之后再重启。万一已经踩了：`loginctl list-sessions` 找到自己那个 seat0 会话，切到另一块 VT 跑 `loginctl activate <会话号>`；同一块 VT 被 greeter 占着就先 `sudo systemctl stop greetd`。
+
 ## 外接显示器（kanshi）
 
 | profile | 触发 | 结果 |
