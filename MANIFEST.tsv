@@ -26,8 +26,9 @@ local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
 micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
 micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务
 systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi 随图形会话启动
-systemd/user/hermes-gateway.service	~/.config/systemd/user/hermes-gateway.service	user	Hermes gateway 单元
-systemd/user/hermes-gateway.service.d/proxy.conf	~/.config/systemd/user/hermes-gateway.service.d/proxy.conf	user	gateway 走本机代理
+systemd/user/hermes-gateway.service	~/.config/systemd/user/hermes-gateway.service	user	Hermes gateway 单元（上游安装器写入，hermes update 会重写，漂了以实机为准）
+systemd/user/hermes-gateway.service.d/launch.conf	~/.config/systemd/user/hermes-gateway.service.d/launch.conf	user	gateway 用 /usr/bin/hermes wrapper 启动（覆盖单元里的 ExecStart）
+systemd/user/hermes-gateway.service.d/proxy.conf	~/.config/systemd/user/hermes-gateway.service.d/proxy.conf	user	gateway 转发走本机 7897 代理
 micmute-led/90-micmute-led.rules	/etc/udev/rules.d/90-micmute-led.rules	root	LED 文件权限
 system-files/etc/greetd/config.toml	/etc/greetd/config.toml	root	登录器（greetd + noctalia-greeter）
 system-files/etc/environment	/etc/environment	root	输入法环境变量

@@ -6,10 +6,10 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/opt/hermes-agent/venv/bin/python -m hermes_cli.main gateway run
+ExecStart="/opt/hermes-agent/venv/bin/python" "-I" "-c" "import os, sys, runpy; os.environ.pop('PYTHONHOME', None); os.environ.pop('PYTHONPATH', None); os.environ.pop('VIRTUAL_ENV', None); sys.path.insert(0, '/opt/hermes-agent'); os.environ['HERMES_HOME'] = os.environ.get('HERMES_HOME') or '/home/srk/.hermes'; import hermes_bootstrap; runpy.run_module('hermes_cli.main', run_name='__main__', alter_sys=True)" "gateway" "run"
 WorkingDirectory=/home/srk/.hermes
-Environment="PATH=/opt/hermes-agent/venv/bin:/home/srk/.hermes/node/bin:/usr/bin:/home/srk/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-Environment="VIRTUAL_ENV=/opt/hermes-agent/venv"
+Environment="PATH=/home/srk/.hermes/node/bin:/home/srk/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 Environment="HERMES_HOME=/home/srk/.hermes"
 Environment="HERMES_SUPERVISED_CHILD=1"
 Restart=always
@@ -20,8 +20,8 @@ RestartPreventExitStatus=78
 KillMode=mixed
 KillSignal=SIGTERM
 ExecReload=/bin/kill -USR1 $MAINPID
-ExecStop=-/opt/hermes-agent/venv/bin/python -m gateway.systemd_stop_mark
-ExecStopPost=-/opt/hermes-agent/venv/bin/python -m gateway.cgroup_cleanup
+ExecStop=-"/opt/hermes-agent/venv/bin/python" "-I" "-c" "import os, sys, runpy; os.environ.pop('PYTHONHOME', None); os.environ.pop('PYTHONPATH', None); os.environ.pop('VIRTUAL_ENV', None); sys.path.insert(0, '/opt/hermes-agent'); os.environ['HERMES_HOME'] = os.environ.get('HERMES_HOME') or '/home/srk/.hermes'; import hermes_bootstrap; runpy.run_module('gateway.systemd_stop_mark', run_name='__main__', alter_sys=True)"
+ExecStopPost=-"/opt/hermes-agent/venv/bin/python" "-I" "-c" "import os, sys, runpy; os.environ.pop('PYTHONHOME', None); os.environ.pop('PYTHONPATH', None); os.environ.pop('VIRTUAL_ENV', None); sys.path.insert(0, '/opt/hermes-agent'); os.environ['HERMES_HOME'] = os.environ.get('HERMES_HOME') or '/home/srk/.hermes'; import hermes_bootstrap; runpy.run_module('gateway.cgroup_cleanup', run_name='__main__', alter_sys=True)"
 TimeoutStopSec=210
 StandardOutput=journal
 StandardError=journal
