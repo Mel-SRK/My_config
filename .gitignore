@@ -1,0 +1,34 @@
+# 凭据、令牌与个人数据：绝不入库。
+# 对应 README「没进仓库的东西」那份清单，这里做兜底，防止手动同步时手滑。
+
+# Hermes 运行时：config.yaml / auth.json / 记忆 / skills / 密钥
+.hermes/
+**/.hermes/
+# 家目录那份的副本（config.yaml 里有 provider 密钥）
+hermes/config.yaml
+
+# 凭据与令牌文件
+**/auth.json
+**/hosts.yml
+**/.env
+**/.env.*
+**/*.key
+**/*.pem
+**/id_rsa*
+**/id_ed25519*
+**/id_ecdsa*
+
+# 密钥环、密码库、SSH
+**/.ssh/
+**/.gnupg/
+**/.pam-gnupg/
+**/.password-store/
+
+# 应用数据目录
+**/.mozilla/
+**/.config/obsidian/
+**/.config/QQ/
+**/.config/discord/
+
+# 备份残留
+**/*.bak
