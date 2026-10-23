@@ -14,6 +14,6 @@ profile mobile {
         enable
         mode 2240x1400@60.002
         position 0,0
-        scale 1.35
+        scale 1.15
     }
 }
