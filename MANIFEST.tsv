@@ -34,6 +34,7 @@ system-files/etc/greetd/config.toml	/etc/greetd/config.toml	root	登录器（gre
 system-files/etc/environment	/etc/environment	root	输入法环境变量
 system-files/etc/pacman.conf	/etc/pacman.conf	root	额外仓库（multilib / blackarch / archlinuxcn）
 system-files/etc/pam.d/greetd	/etc/pam.d/greetd	root	含 pam_gnupg 段（登录时预置 GPG passphrase）
+system-files/etc/systemd/journald.conf.d/10-size.conf	/etc/systemd/journald.conf.d/10-size.conf	root	journal 上限 1G（默认 4G）
 system-files/etc/systemd/system/clash-verge-service.service	/etc/systemd/system/clash-verge-service.service	root	Clash Verge 内核服务
 system-files/etc/systemd/system/kvm-nat-bypass-routes.service	/etc/systemd/system/kvm-nat-bypass-routes.service	root	KVM NAT 绕过 mihomo TUN
 system-files/etc/udev/rules.d/50-nuphy.rules	/etc/udev/rules.d/50-nuphy.rules	root	NuPhy 键盘 hidraw 权限
