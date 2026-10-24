@@ -73,8 +73,18 @@ output "eDP-1" {
 }
 
 // Output configuration — 外接显示器 HKC G27H2Max (2560x1440@200Hz)
-// 内屏 eDP-1 由 kanshi 在外接接入时熄灭（profile: docked / 移动），见 kanshi/config
+// 两个 DP 口都写一份，谁接都一样 200Hz、放左侧；实际开关由 kanshi 按接口决定：
+//   DP-1 接了 → 内屏熄灭（docked-dp1）
+//   DP-2 接了 → 内屏保留，双屏（docked-dp2）
 output "DP-1" {
+    mode "2560x1440@200"
+    scale 1
+    transform "normal"
+    focus-at-startup
+    position x=0 y=0
+}
+
+output "DP-2" {
     mode "2560x1440@200"
     scale 1
     transform "normal"

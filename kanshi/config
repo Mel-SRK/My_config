@@ -1,4 +1,5 @@
-profile docked {
+# 外接 HKC G27H2Max 接在 DP-1（原接线）：熄内屏，只用外接
+profile docked-dp1 {
     output eDP-1 disable
 
     output DP-1 {
@@ -9,6 +10,24 @@ profile docked {
     }
 }
 
+# 外接接在 DP-2（接口对调后）：双屏都开，外接在左 200Hz，内屏在右
+profile docked-dp2 {
+    output DP-2 {
+        enable
+        mode 2560x1440@200.000
+        position 0,0
+        scale 1
+    }
+
+    output eDP-1 {
+        enable
+        mode 2240x1400@60.002
+        position 2560,0
+        scale 1.15
+    }
+}
+
+# 没接外接：只开内屏
 profile mobile {
     output eDP-1 {
         enable
