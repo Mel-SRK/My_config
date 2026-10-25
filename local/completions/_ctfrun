@@ -42,7 +42,9 @@ _ctfrun() {
       '-h[用法]'
       '--help[用法]'
     )
-    if (( npos > 0 )) && [[ $tool == ctfdbg ]]; then
+    if [[ $tool == ctfdbg ]]; then
+      # ctfdbg 的脚本遇到不认识的选项就 break，所以 `ctfdbg -q ./chall`
+      # 里的 -q 是直接交给 gdb 的，文件之前也能用
       cands+=(
         '-ex[执行一条 gdb 命令（可重复）]'
         '-iex[同上，在初始化阶段执行]'
@@ -54,7 +56,9 @@ _ctfrun() {
         '--args[后面全部作为目标程序参数]'
       )
     fi
-    (( ${#cands} )) && _describe -t opts '选项' cands
+    # 用 _values 而不是 _describe：这里要的就是 `值[说明]` 写法，
+    # _describe 认的是 `值:说明`，喂错格式会把 "-h[用法]" 整个插进命令行。
+    (( ${#cands} )) && _values '选项' $cands
     return
   fi
 
