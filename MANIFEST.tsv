@@ -22,6 +22,7 @@ home/.gdbinit	~/.gdbinit	user	加载 pwndbg
 p10k/.p10k.zsh	~/.p10k.zsh	user	powerlevel10k 提示符
 local/bin/ctfdbg	~/.local/bin/ctfdbg	user	沙箱里用 pwndbg 调样本
 local/bin/ctfrun	~/.local/bin/ctfrun	user	沙箱里跑任意命令
+local/completions/_ctfrun	~/.oh-my-zsh/custom/completions/_ctfrun	user	ctfrun/ctfdbg 的 zsh 补全（oh-my-zsh 已把它放进 $fpath，装完新开 shell 生效）
 local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
 micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
 micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务

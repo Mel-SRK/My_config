@@ -177,6 +177,8 @@ ctfrun -n ./chall             # 放开网络（用你的 IP 出去）
 | `--rlimit-nproc=2000` | 进程数上限 | 防 fork 炸弹拖死机器 |
 | `--allow-debuggers` | 放行 ptrace | 必须开，否则 gdb 用不了 |
 
+zsh 补全在 `local/completions/_ctfrun`（两个脚本共用，靠 `#compdef ctfrun ctfdbg`）。按脚本自己的解析顺序给候选：命令之前只补 `-n/--net/--no-net/-h/--help`，第一个词补当前目录里可执行的文件 + PATH 里的外部命令（`ctfrun python3 exp.py`），再往后原样透传只补文件名——`ctfrun ./chall -n` 里那个 `-n` 是给样本的，所以不会当自己的选项补出来。
+
 系统目录（`/usr` `/lib` `/etc`）仍可见但只读——动态链接的程序必须读到 libc / ld.so 才能跑，把它们也藏起来程序根本起不来。
 
 安全性边界：和 docker 同一批内核机制（namespace + seccomp + caps），**挡不住内核 0day**；当前目录可写，别把唯一原件放进去跑；联网档下样本以你的网络身份对外发流量。

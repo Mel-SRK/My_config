@@ -1,0 +1,74 @@
+#compdef ctfrun ctfdbg
+# _ctfrun — ctfrun / ctfdbg 的 zsh 补全（两个脚本参数解析完全一致，共用一份）。
+#
+# 候选按脚本自己的解析顺序给，不是照搬参数表：
+#   命令之前   -n/--net/--no-net/-h/--help（脚本只在开头这段认选项）
+#   第一个词   当前目录里可执行的文件（ctfrun 的裸名会自动补 ./, 没有执行位直接拒绝）
+#              + PATH 里的外部命令（对应 `ctfrun python3 exp.py` 这种用法；
+#                只给外部命令，别名和内建进不了 execvp）
+#              ctfdbg 不受执行位限制（gdb 能打开任何文件），另外认 gdb 的开关
+#   之后的词   原样透传：ctfrun 给样本，ctfdbg 给 gdb，这里无从得知目标要什么，只补文件名
+#
+# 装法：本文件要落在 $fpath 里。oh-my-zsh 把 $ZSH_CUSTOM/completions 加进 $fpath
+# （在 compinit 之前），所以软链过去即可，不用改 .zshrc：
+#   ln -sf ~/Projects/Git_Program/My_config/local/completions/_ctfrun \
+#          ~/.oh-my-zsh/custom/completions/_ctfrun
+# 新开 shell 生效（compinit 会自己发现新增文件）。
+
+_ctfrun() {
+  # options 要保持 _main_complete 给的那套：extendedglob 关掉的话 _files 内部
+  # 给模式做的转义（([][()|*?^#~<>]) + (#b)）会失效，然后它 eval 出来的裸 glob
+  # 撞上 NOMATCH 直接报 "no matches found: *(x):globbed-files"，候选一个都出不来。
+  emulate -L zsh
+  setopt localoptions extendedglob nullglob rcexpandparam
+  local tool=${service:-ctfrun}
+  local -i npos=0
+  local w
+  # 已经写下的词里有几个非选项词：>0 说明命令已经输入了，选项段就此结束
+  for w in ${words[2,CURRENT-1]}; do
+    case $w in
+      (-n|--net|--no-net|-h|--help) ;;
+      (*) (( npos++ )) ;;
+    esac
+  done
+
+  if [[ $PREFIX == -* ]]; then
+    local -a cands=()
+    # 命令之后的 -n 会被脚本原样透传给目标，不算 ctfrun 的选项
+    (( npos == 0 )) && cands+=(
+      '-n[放开网络：共享宿主网络栈，样本可联网（默认断网）]'
+      '--net[放开网络：同 -n]'
+      '--no-net[完全断网（默认）]'
+      '-h[用法]'
+      '--help[用法]'
+    )
+    if (( npos > 0 )) && [[ $tool == ctfdbg ]]; then
+      cands+=(
+        '-ex[执行一条 gdb 命令（可重复）]'
+        '-iex[同上，在初始化阶段执行]'
+        '-x[从文件里读 gdb 命令]'
+        '-q[安静启动]'
+        '-nx[不读 ~/.gdbinit]'
+        '-batch[跑完退出，不交互]'
+        '-tui[打开 TUI 界面]'
+        '--args[后面全部作为目标程序参数]'
+      )
+    fi
+    (( ${#cands} )) && _describe -t opts '选项' cands
+    return
+  fi
+
+  if (( npos == 0 )); then
+    if [[ $tool == ctfdbg ]]; then
+      _files                                  # gdb 能打开任何文件，不限执行位
+    else
+      _files -g '*(x)' || _files              # 当前目录：优先只给能跑的（裸名用法）
+    fi
+    _command_names -e                         # PATH 里的外部命令
+    return
+  fi
+
+  _files                                      # 透传参数，最少能补文件名
+}
+
+_ctfrun "$@"
