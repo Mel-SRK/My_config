@@ -6,13 +6,12 @@
 #   第一个词   当前目录里可执行的文件（ctfrun 的裸名会自动补 ./, 没有执行位直接拒绝）
 #              + PATH 里的外部命令（对应 `ctfrun python3 exp.py` 这种用法；
 #                只给外部命令，别名和内建进不了 execvp）
-#              ctfdbg 不受执行位限制（gdb 能打开任何文件），另外认 gdb 的开关
+#              ctfdbg 不受执行位限制（gdb 能打开任何文件），gdb 的开关在文件前后都认
 #   之后的词   原样透传：ctfrun 给样本，ctfdbg 给 gdb，这里无从得知目标要什么，只补文件名
 #
-# 装法：本文件要落在 $fpath 里。oh-my-zsh 把 $ZSH_CUSTOM/completions 加进 $fpath
-# （在 compinit 之前），所以软链过去即可，不用改 .zshrc：
-#   ln -sf ~/Projects/Git_Program/My_config/local/completions/_ctfrun \
-#          ~/.oh-my-zsh/custom/completions/_ctfrun
+# 装法：本文件得落在 $fpath 里。oh-my-zsh 把 $ZSH_CUSTOM/completions 加进 $fpath
+# （在 compinit 之前），拷进去即可，不用改 .zshrc（MANIFEST.tsv 里有这条）：
+#   install -m644 local/completions/_ctfrun ~/.oh-my-zsh/custom/completions/
 # 新开 shell 生效（compinit 会自己发现新增文件）。
 
 _ctfrun() {
@@ -28,7 +27,7 @@ _ctfrun() {
   for w in ${words[2,CURRENT-1]}; do
     case $w in
       (-n|--net|--no-net|-h|--help) ;;
-      (*) (( npos++ )) ;;
+      (*) (( ++npos )) ;;
     esac
   done
 
