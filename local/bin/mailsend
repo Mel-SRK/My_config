@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Send mail through an account already configured in Thunderbird.
+
+Nothing is stored in plaintext: credentials are read out of Thunderbird's
+NSS key4.db at send time (the same thing Thunderbird itself does).
+
+  * password account -> SMTP AUTH with the stored password / auth code
+  * Gmail            -> the stored OAuth2 refresh token is exchanged for a
+                        short-lived access token, then AUTH XOAUTH2
+
+Usage:
+    mailsend --to a@b.c --subject "hi" --body-file /tmp/body.txt
+    mailsend --from qq --to a@b.c --subject s --body -
+
+Needs ~/.local/lib/mailsend/firefox_decrypt.py to read the credential DB
+(get it from https://github.com/unode/firefox_decrypt).
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import subprocess
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from email.message import EmailMessage
+from email.utils import formataddr, formatdate, make_msgid
+from pathlib import Path
+import smtplib
+import ssl
+
+HOME = Path.home()
+TB_DIR = HOME / ".config/thunderbird"
+DECRYPTOR = HOME / ".local/lib/mailsend/firefox_decrypt.py"
+
+ACCOUNTS = {
+    "gmail": {
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "implicit_tls": True,
+        "auth": "xoauth2",
+        "login_url": "oauth://accounts.google.com",
+        "token_url": "https://www.googleapis.com/oauth2/v3/token",
+        # Thunderbird's built-in "installed app" OAuth client. Not a secret:
+        # it ships in omni.ja and is useless without this account's token.
+        "client_id": "406964657835-aq8lmia8j95dhl1a2bvharmfk3t1hgqj.apps.googleusercontent.com",
+        "client_secret": "kSmqreRr0qwBWJgbf5Y-PjSU",
+        "address": "melsrk116@gmail.com",
+        "display": "TS2Kk",
+    },
+    "qq": {
+        "host": "smtp.qq.com",
+        "port": 465,
+        "implicit_tls": True,
+        "auth": "password",
+        "login_url": "smtp://smtp.qq.com",
+        "address": "3203216748@qq.com",
+        "display": "TS2Kk",
+    },
+}
+DEFAULT_ACCOUNT = "gmail"
+
+
+def find_profile(login_url: str) -> Path | None:
+    """Locate the Thunderbird profile whose logins.json holds this login."""
+    for logins in sorted(TB_DIR.glob("*/logins.json")):
+        try:
+            data = json.loads(logins.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            continue
+        for entry in data.get("logins", []):
+            if entry.get("hostname") == login_url:
+                return logins.parent
+    return None
+
+
+def read_credential(profile: Path, login_url: str) -> tuple[str, str]:
+    """Return (user, secret) for login_url, decrypted by firefox_decrypt."""
+    if not DECRYPTOR.is_file():
+        raise SystemExit(f"missing helper: {DECRYPTOR}")
+    proc = subprocess.run(
+        [sys.executable, str(DECRYPTOR), "-f", "json", str(profile)],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise SystemExit(
+            "credential decryption failed (primary password set?):\n"
+            + proc.stderr.strip()[-800:]
+        )
+    for entry in json.loads(proc.stdout or "[]"):
+        if entry.get("url") == login_url:
+            user = entry.get("user") or ""
+            secret = entry.get("password") or ""
+            if user and secret:
+                return user, secret
+    raise SystemExit(f"no usable credential found for {login_url}")
+
+
+def mint_access_token(acct: dict, refresh_token: str) -> str:
+    body = urllib.parse.urlencode(
+        {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": acct["client_id"],
+            "client_secret": acct["client_secret"],
+        }
+    ).encode()
+    req = urllib.request.Request(acct["token_url"], data=body, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            payload = json.loads(resp.read())
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode(errors="replace")[:400]
+        raise SystemExit(
+            f"token refresh failed ({exc.code}): {detail}\n"
+            "invalid_grant means the token was revoked - sign in to this "
+            "Gmail account in Thunderbird again to mint a fresh one."
+        ) from None
+    except urllib.error.URLError as exc:
+        raise SystemExit(f"token endpoint unreachable: {exc.reason}") from None
+    token = payload.get("access_token")
+    if not token:
+        raise SystemExit(f"no access_token in response: {payload}")
+    return token
+
+
+def authenticate(server, acct: dict, username: str, secret: str) -> None:
+    if acct["auth"] == "password":
+        try:
+            server.login(username, secret)
+        except smtplib.SMTPAuthenticationError as exc:
+            err = exc.smtp_error
+            if isinstance(err, bytes):
+                err = err.decode(errors="replace")
+            raise SystemExit(
+                f"SMTP auth for {username} rejected ({exc.smtp_code}): {err}"
+            ) from None
+        return
+
+    token = mint_access_token(acct, secret)
+    blob = f"user={username}\1auth=Bearer {token}\1\1"
+    code, resp = server.docmd(
+        "AUTH", "XOAUTH2 " + base64.b64encode(blob.encode()).decode()
+    )
+    if code != 235:
+        raise SystemExit(f"XOAUTH2 rejected ({code}): {resp!r}")
+
+
+def read_body(args) -> str:
+    if args.body_file:
+        if args.body_file == "-":
+            return sys.stdin.read()
+        return Path(args.body_file).read_text(encoding="utf-8")
+    if args.body is not None:
+        return args.body
+    raise SystemExit("need --body or --body-file")
+
+
+def build_message(args, acct: dict) -> EmailMessage:
+    msg = EmailMessage()
+    msg["From"] = formataddr((args.display or acct["display"], acct["address"]))
+    msg["To"] = ", ".join(args.to)
+    if args.cc:
+        msg["Cc"] = ", ".join(args.cc)
+    msg["Subject"] = args.subject
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain=acct["address"].split("@")[1])
+    if args.reply_to:
+        msg["Reply-To"] = args.reply_to
+    if args.in_reply_to:
+        msg["In-Reply-To"] = args.in_reply_to
+    if args.references:
+        msg["References"] = args.references
+    msg.set_content(read_body(args), subtype="plain", charset="utf-8")
+    for path in args.attach or []:
+        p = Path(path)
+        if not p.is_file():
+            raise SystemExit(f"attachment not found: {p}")
+        msg.add_attachment(
+            p.read_bytes(), maintype="application", subtype="octet-stream",
+            filename=p.name,
+        )
+    return msg
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Send mail via a Thunderbird account.")
+    ap.add_argument("--from", dest="sender", default=DEFAULT_ACCOUNT,
+                    choices=sorted(ACCOUNTS))
+    ap.add_argument("--to", action="append", required=True, metavar="ADDR")
+    ap.add_argument("--cc", action="append", default=[], metavar="ADDR")
+    ap.add_argument("--bcc", action="append", default=[], metavar="ADDR")
+    ap.add_argument("--subject", required=True)
+    ap.add_argument("--body", help="inline body text, or '-' for stdin")
+    ap.add_argument("--body-file", metavar="PATH")
+    ap.add_argument("--attach", action="append", metavar="PATH")
+    ap.add_argument("--display", help="override the From display name")
+    ap.add_argument("--reply-to")
+    ap.add_argument("--in-reply-to")
+    ap.add_argument("--references")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="build and print, do not send")
+    args = ap.parse_args()
+
+    acct = ACCOUNTS[args.sender]
+    profile = find_profile(acct["login_url"])
+    if profile is None:
+        raise SystemExit(f"no Thunderbird credential for {acct['login_url']}")
+    username, secret = read_credential(profile, acct["login_url"])
+    msg = build_message(args, acct)
+    recipients = args.to + args.cc + args.bcc
+
+    if args.dry_run:
+        print(f"account : {args.sender}  {acct['host']}:{acct['port']}  auth={acct['auth']}")
+        print(f"profile : {profile}")
+        print(f"auth as : {username}")
+        print(msg.as_string())
+        return 0
+
+    ctx = ssl.create_default_context()
+    if acct["implicit_tls"]:
+        server = smtplib.SMTP_SSL(acct["host"], acct["port"], context=ctx, timeout=60)
+    else:
+        server = smtplib.SMTP(acct["host"], acct["port"], timeout=60)
+    try:
+        server.ehlo()
+        if not acct["implicit_tls"]:
+            server.starttls(context=ctx)
+            server.ehlo()
+        authenticate(server, acct, username, secret)
+        refused = server.sendmail(acct["address"], recipients, msg.as_string())
+    finally:
+        try:
+            server.quit()
+        except Exception:
+            pass
+
+    print(f"sent: {msg['Message-ID']}")
+    print(f"from: {acct['address']}  to: {', '.join(recipients)}")
+    if refused:
+        print(f"REFUSED: {refused}")
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

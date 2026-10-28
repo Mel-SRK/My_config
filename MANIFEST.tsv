@@ -24,6 +24,7 @@ local/bin/ctfdbg	~/.local/bin/ctfdbg	user	沙箱里用 pwndbg 调样本
 local/bin/ctfrun	~/.local/bin/ctfrun	user	沙箱里跑任意命令
 local/completions/_ctfrun	~/.oh-my-zsh/custom/completions/_ctfrun	user	ctfrun/ctfdbg 的 zsh 补全（oh-my-zsh 已把它放进 $fpath，装完新开 shell 生效）
 local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
+local/bin/mailsend	~/.local/bin/mailsend	user	命令行发信：复用 Thunderbird 凭据（password / Gmail XOAUTH2），不落明文密码
 micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
 micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务
 systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi 随图形会话启动
