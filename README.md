@@ -185,16 +185,4 @@ zsh 补全在 `local/completions/_ctfrun`（两个脚本共用，靠 `#compdef c
 
 ## Hermes gateway
 
-`systemd/user/hermes-gateway.service` + `.d/proxy.conf`：从 `/opt/hermes-agent/venv` 起 gateway，转发走本机 7897 代理。单元本身没有密钥——密钥与记忆在 `~/.hermes/`，那份不进这个公开仓库。
-
-## 没进仓库的东西
-
-带凭据或纯个人数据，只走 `~/backups/`（手动拷 U 盘的备份集）：
-
-`~/.config/gh/hosts.yml`（含 oauth_token）、`~/.hermes/config.yaml` 与 `auth.json`、`~/.ssh`、`~/.gnupg`、`~/.pam-gnupg`、`~/.password-store`、各应用数据目录（mozilla / QQ / discord / obsidian / chromium）、LibreOffice 的 `.docx.bak`。
-
-## 历史与回滚
-
-`archive/` 里是退役方案，只留文件、不再部署：waybar、fuzzel、niri-auto-edp、niri-internal-off（已由 kanshi 取代）、swayidle + `idle-action.sh`（已由 Noctalia 原生空闲管理取代）、`sddm-sync-wallpaper.sh`（SDDM 时代）、Noctalia v4 全套、以及一份与 dotfiles 无关的搜索工具说明。
-
-2026-10-05 重写了提交历史：所有提交的作者/提交者统一为 `Mel-SRK <63025838+Mel-SRK@users.noreply.github.com>`，原先带 QQ 邮箱与真实姓名的提交哈希已全部失效。按老哈希直接访问 GitHub 仍可能取到旧对象（GitHub 不承诺即时回收），要彻底清除需走 GitHub Support。
+`systemd/user/hermes-gateway.service` + `.d/proxy.conf`：从 `/opt/hermes-agent/venv` 起 gateway，转发走本机 7897 代理。
