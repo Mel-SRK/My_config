@@ -442,3 +442,9 @@ tmux_conf_update_plugins_on_reload=false
 #
 # "$@"
 # # /!\ do not remove the previous line
+
+# session group: 多终端视图取最小尺寸，保证小窗口能看全
+set -g window-size smallest
+
+# 每个 view 按自己 client 的尺寸重排，切换时窗口自适应
+set -g aggressive-resize on

@@ -19,7 +19,9 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = {
-        "lua_ls", "clangd", "pyright", "html", "cssls",
+        -- clangd 故意不装：mason 的 release 二进制 RUNPATH 末尾有空项会搜 cwd，
+        -- 在放 libc.so.6 的 pwn 目录里必崩。C/C++ 用系统的 /usr/bin/clangd。
+        "lua_ls", "pyright", "html", "cssls",
         "bashls", "jsonls", "ts_ls", "gopls",
       },
       automatic_enable = {
@@ -59,8 +61,11 @@ return {
       })
 
       -- Per-server configs (vim.lsp.config is native in nvim 0.12)
+      -- 用系统 /usr/bin/clangd：mason 下载的 22.1.6 release 二进制带 RUNPATH
+      -- "$ORIGIN/../lib:"（末尾空项 = 搜索当前目录），在含 libc.so.6 的 pwn 目录里
+      -- 会加载旧 libc 直接崩（GLIBC_ABI_DT_RELR not found）。
       vim.lsp.config("clangd", {
-        cmd = { "clangd", "--background-index", "--clang-tidy" },
+        cmd = { "/usr/bin/clangd", "--background-index", "--clang-tidy" },
       })
 
       vim.lsp.config("lua_ls", {
@@ -118,6 +123,11 @@ return {
       vim.lsp.config("html", {})
       vim.lsp.config("cssls", {})
       vim.lsp.config("bashls", {})
+
+      -- clangd 不在 mason 里，mason-lspconfig 的 automatic_enable 只对已安装的
+      -- mason 包调 vim.lsp.enable，所以这里必须自己 enable（filetypes/root_markers
+      -- 来自 nvim-lspconfig 自带的 lsp/clangd.lua）。
+      vim.lsp.enable("clangd")
     end,
   },
 
