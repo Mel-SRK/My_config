@@ -1,26 +1,34 @@
 # 登录即进 tmux。必须放在 p10k instant prompt 之前：
 # instant prompt 会重定向 fd 0/1/2 且到 zshrc 末尾才恢复，放在后面 attach 必然失败。
-# 首个终端开 TS2K，之后每个终端自动建独立视图（session group）：
+# 终端总是进 TS2K；只有当 TS2K 已被别的终端占用时，才开独立视图（session group）：
 # 同一 group 内窗口列表共享、当前窗口各自独立，多个终端互不干扰。
+# exec 让 tmux 取代 shell：退出 tmux 即退出终端，不会落回 zsh；
+# 视图客户端断开时由 destroy-unattached 自毁，不残留、不越堆越多。
 if [[ -z "$TMUX" && -o interactive && "$TERM" != "dumb" ]]; then
-    if tmux has-session -t TS2K 2>/dev/null; then
-        # 固定 view1..view4 轮流复用：关终端时残留的会被下次捡起来，不会越堆越多
-        for i in 1 2 3 4; do
-            s="view$i"
-            if ! tmux has-session -t "$s" 2>/dev/null; then
-                tmux new-session -d -t TS2K -s "$s" 2>/dev/null
-                tmux attach -t "$s"
-                tmux kill-session -t "$s" 2>/dev/null
-                break
-            elif [ "$(tmux display -p -t "$s" '#{session_attached}' 2>/dev/null)" = "0" ]; then
-                tmux attach -t "$s"
-                tmux kill-session -t "$s" 2>/dev/null
-                break
-            fi
-        done
-    else
-        tmux new-session -A -s TS2K
+    if ! tmux has-session -t '=TS2K' 2>/dev/null; then
+        exec tmux new-session -A -s TS2K
     fi
+
+    # TS2K 没人占用：优先回到主会话（等同开机首个终端）
+    if [[ "$(tmux display -p -t TS2K '#{session_attached}' 2>/dev/null)" == 0 ]]; then
+        exec tmux attach -t '=TS2K'
+    fi
+
+    # TS2K 已被占用：占用编号最小的空闲视图
+    for i in {1..9}; do
+        s="view$i"
+        tmux has-session -t "=$s" 2>/dev/null ||
+            tmux new-session -d -t '=TS2K' -s "$s" 2>/dev/null
+        if [[ "$(tmux display -p -t "$s" '#{session_attached}' 2>/dev/null)" == 0 ]]; then
+            # 该 client 断开后视图会话自动销毁（视图只在这个终端存活期间存在）
+            tmux set-hook -t "$s" client-attached \
+                "set-option -t $s destroy-unattached on" 2>/dev/null
+            exec tmux attach -t "=$s"
+        fi
+    done
+
+    # 视图全部占满：退回主会话；若 TS2K 恰好刚消失则直接重建
+    exec tmux new-session -A -s TS2K
 fi
 
 # Enable Powerlevel10k instant prompt
