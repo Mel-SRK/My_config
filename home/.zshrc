@@ -4,7 +4,7 @@
 # 同一 group 内窗口列表共享、当前窗口各自独立，多个终端互不干扰。
 # exec 让 tmux 取代 shell：退出 tmux 即退出终端，不会落回 zsh；
 # 视图客户端断开时由 destroy-unattached 自毁，不残留、不越堆越多。
-if [[ -z "$TMUX" && -o interactive && "$TERM" != "dumb" ]]; then
+if [[ -z "$TMUX" && -o interactive && -t 0 && -t 1 && -n "$TERM" && "$TERM" != "dumb" ]]; then
     if ! tmux has-session -t '=TS2K' 2>/dev/null; then
         exec tmux new-session -A -s TS2K
     fi
