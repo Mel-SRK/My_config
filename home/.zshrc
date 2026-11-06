@@ -31,54 +31,60 @@ if [[ -z "$TMUX" && -o interactive && -t 0 && -t 1 && -n "$TERM" && "$TERM" != "
     exec tmux new-session -A -s TS2K
 fi
 
-# Enable Powerlevel10k instant prompt
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# 提示符、补全、插件只在真的有终端时加载。工具用管道跑 `zsh -i -c` 时没有控制终端，
+# job control 开不起来：powerlevel10k 的 gitstatus 在 `setopt monitor` 处失败，
+# 先打印 can't change option: monitor，再打印 gitstatus failed to initialize，
+# 这些噪声会盖在命令自己的输出前面，看起来像命令出错。
+typeset -gi __have_tty=0
+[[ -o interactive && -t 0 && -t 1 ]] && __have_tty=1
 
-# Oh My Zsh
-export ZSH="/usr/share/oh-my-zsh"
-ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
-
-# Theme
-ZSH_THEME="powerlevel10k/powerlevel10k"
-
-# Plugins
-plugins=(
-    git
-    z
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-)
-
-source $ZSH/oh-my-zsh.sh
-
-# User aliases
-alias vim="nvim"
-alias vi="nvim"
-alias ls="ls --color=auto"
-alias ll="ls -la"
-alias la="ls -A"
-
-# Environment
+# 环境变量对所有 shell 生效，包括没有终端的工具调用
 export PATH="$HOME/.local/bin:$PATH"
 export EDITOR="nvim"
 export VISUAL="nvim"
-
-# p10k 配置
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# vlc皮肤
 export QT_QPA_PLATFORMTHEME=qt5ct
-
 
 # Clash Verge 代理
 export http_proxy=http://127.0.0.1:7897
 export https_proxy=http://127.0.0.1:7897
 export all_proxy=socks5://127.0.0.1:7897
 
-#fuck
-eval $(thefuck --alias)
+if (( __have_tty )); then
+    # Enable Powerlevel10k instant prompt
+    if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+      source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+    fi
 
-# Oh-my-pi
-eval "$(omp completions zsh)"
+    # Oh My Zsh
+    export ZSH="/usr/share/oh-my-zsh"
+    ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+
+    # Theme
+    ZSH_THEME="powerlevel10k/powerlevel10k"
+
+    # Plugins
+    plugins=(
+        git
+        z
+        zsh-autosuggestions
+        zsh-syntax-highlighting
+    )
+
+    source $ZSH/oh-my-zsh.sh
+
+    # User aliases
+    alias vim="nvim"
+    alias vi="nvim"
+    alias ls="ls --color=auto"
+    alias ll="ls -la"
+    alias la="ls -A"
+
+    # p10k 配置
+    [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+    #fuck
+    eval $(thefuck --alias)
+
+    # Oh-my-pi
+    eval "$(omp completions zsh)"
+fi
