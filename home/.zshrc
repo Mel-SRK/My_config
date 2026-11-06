@@ -39,7 +39,11 @@ typeset -gi __have_tty=0
 [[ -o interactive && -t 0 && -t 1 ]] && __have_tty=1
 
 # 环境变量对所有 shell 生效，包括没有终端的工具调用
-export PATH="$HOME/.local/bin:$PATH"
+# PATH 幂等：交互式 shell 里再起 zsh 时不要重复叠加同一目录
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
 export EDITOR="nvim"
 export VISUAL="nvim"
 export QT_QPA_PLATFORMTHEME=qt5ct
