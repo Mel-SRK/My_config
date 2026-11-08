@@ -41,4 +41,5 @@ system-files/etc/systemd/system/clash-verge-service.service	/etc/systemd/system/
 system-files/etc/systemd/system/kvm-nat-bypass-routes.service	/etc/systemd/system/kvm-nat-bypass-routes.service	root	KVM NAT 绕过 mihomo TUN
 system-files/etc/udev/rules.d/50-nuphy.rules	/etc/udev/rules.d/50-nuphy.rules	root	NuPhy 键盘 hidraw 权限
 system-files/etc/udev/rules.d/50-vgn-mouse.rules	/etc/udev/rules.d/50-vgn-mouse.rules	root	VGN 鼠标 hidraw 权限
+system-files/etc/udev/hwdb.d/61-battery-local.hwdb	/etc/udev/hwdb.d/61-battery-local.hwdb	root	upower 充电阈值 45/80（BAT0）
 system-files/usr/local/sbin/kvm-nat-bypass-routes.sh	/usr/local/sbin/kvm-nat-bypass-routes.sh	root	上面那个 service 的脚本

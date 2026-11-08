@@ -1,0 +1,2 @@
+battery:BAT0:5B11M90026:dmi:*
+ CHARGE_LIMIT=45,80
