@@ -1,0 +1,24 @@
+#!/bin/sh
+# Two niri/Electron pitfalls this wrapper works around:
+#
+# 1. safeStorage: niri is not in Electron's desktop table, so the packaged
+#    build falls back to basic_text and refuses to save a login
+#    (CREDENTIAL_STORE_UNAVAILABLE). Force the libsecret backend;
+#    pass-secret-service provides org.freedesktop.secrets here.
+#
+# 2. Screen capture: launching from a shell that has DISPLAY but no
+#    WAYLAND_DISPLAY makes Electron pick X11 (XWayland). Screen capture then
+#    grabs the empty X root window, so remote desktop streams black frames
+#    with only the pointer. Force the Wayland platform when a compositor
+#    socket exists.
+
+if [ -z "${WAYLAND_DISPLAY:-}" ] && [ -z "${XDG_SESSION_TYPE:-}" ]; then
+    for s in /run/user/"$(id -u)"/wayland-*; do
+        [ -S "$s" ] || continue
+        WAYLAND_DISPLAY=${s##*/}
+        export WAYLAND_DISPLAY XDG_SESSION_TYPE=wayland
+        break
+    done
+fi
+
+exec /usr/bin/cindy --password-store=gnome-libsecret "$@" ${WAYLAND_DISPLAY:+--ozone-platform=wayland}

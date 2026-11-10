@@ -25,6 +25,8 @@ local/bin/ctfrun	~/.local/bin/ctfrun	user	沙箱里跑任意命令
 local/completions/_ctfrun	~/.oh-my-zsh/custom/completions/_ctfrun	user	ctfrun/ctfdbg 的 zsh 补全（oh-my-zsh 已把它放进 $fpath，装完新开 shell 生效）
 local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
 local/bin/mailsend	~/.local/bin/mailsend	user	命令行发信：复用 Thunderbird 凭据（password / Gmail XOAUTH2），不落明文密码
+local/bin/cindy	~/.local/bin/cindy	user	Cindy 启动包装：强制 libsecret（niri 不在 Electron 桌面表里）+ 补 Wayland 平台，否则登录存储不可用、远程桌面黑屏
+local/share/applications/cindy.desktop	~/.local/share/applications/cindy.desktop	user	用户级 desktop 项：Exec 指向上面那个 wrapper，优先于 /usr/share 的包内版本
 micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
 micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务
 systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi 随图形会话启动
