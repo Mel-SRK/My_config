@@ -50,7 +50,7 @@ niri（`Super` 即 Mod）：
 
 媒体键 `Ctrl+Alt+Left/Right` 或 `XF86AudioPrev/Next`，亮度走 `noctalia msg brightness-up/down`（不再用 brightnessctl）。
 
-截图分两套：`Print` 系走 niri 内置，快，适合立刻要图；`Mod+Shift+S` 起 satty 可画箭头/方框/马赛克，`Mod+Shift+O` 把选中区域的文字识别进剪贴板（`chi_sim+eng`，截代码和报错用）。脚本在 `local/bin/screenshot-annotate`、`local/bin/ocr-region`。
+截图分两套：`Print` 系走 niri 内置，快，适合立刻要图；`Mod+Shift+S` 和 `Mod+Shift+O` 的选区也走 niri 截图 UI（选区期间冻结画面，grim + slurp 是实时画面，不冻结），选完再由 satty 标注或 tesseract 识别。`Mod+Shift+S` 存盘到 `~/Pictures/Screenshots`，只保留最近 200 张（`SCREENSHOT_KEEP` 可改，0 = 不清理），niri 自带 `Print` 存的图也计入。脚本在 `local/bin/screenshot-annotate`、`local/bin/ocr-region`。
 
 tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 `Ctrl+b`）。新建窗口 `Ctrl+x` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
 

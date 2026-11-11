@@ -1,22 +1,38 @@
 #!/usr/bin/env bash
-# 区域截图 → satty 标注 → Enter 复制到剪贴板并同时存盘，Esc 退出不保存。
-# 存盘目录可用 SCREENSHOT_DIR 覆盖。
+# 区域截图 → satty 标注 → Enter 复制到剪贴板并覆盖保存。
+#
+# 选区用 niri 自己的截图 UI：它在选区期间冻结画面，选完写盘并复制到剪贴板。
+# grim + slurp 是实时画面，背景里有视频/动画时会错过目标，所以这里不用。
+# niri 的 CLI 调用在选区完成前就返回（niri#2664），只能轮询等文件落地。
+#
+# SCREENSHOT_DIR 换目录，SCREENSHOT_KEEP 改保留张数（默认 200，0 = 不清理）。
 set -euo pipefail
 
 dir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
+keep="${SCREENSHOT_KEEP:-200}"
 mkdir -p -- "$dir"
+out="$dir/$(date +'%Y-%m-%d %H-%M-%S').png"
 
-# Esc 取消选区时 slurp 退出码非 0，直接放弃，不要往下走
-geometry=$(slurp -b '#00000080' -c '#7aa2f7ff') || exit 0
+command -v niri >/dev/null 2>&1 || { echo '需要 niri' >&2; exit 1; }
+niri msg action screenshot --path "$out" >/dev/null || exit 1
 
-tmp=$(mktemp --suffix=.png)
-trap 'rm -f -- "$tmp"' EXIT
-grim -g "$geometry" -- "$tmp"
+# 最多等 60 秒；用户按 Esc 取消时不会有文件
+for _ in $(seq 1 600); do
+  [[ -s "$out" ]] && break
+  sleep 0.1
+done
+[[ -s "$out" ]] || exit 0
 
-satty --filename "$tmp" \
+satty --filename "$out" \
   --copy-command wl-copy \
   --save-after-copy \
-  --output-filename "$dir/%Y-%m-%d %H-%M-%S.png" \
+  --output-filename "$out" \
   --actions-on-enter save-to-clipboard \
   --actions-on-escape exit \
   --early-exit copy
+
+# 只留最近 keep 张，niri 自带 Print 存的图也在这个目录里，一并算进来
+if (( keep > 0 )); then
+  find "$dir" -maxdepth 1 -type f -name '*.png' -printf '%T@ %p\n' |
+    sort -rn | tail -n "+$((keep + 1))" | cut -d' ' -f2- | xargs -r rm -f
+fi

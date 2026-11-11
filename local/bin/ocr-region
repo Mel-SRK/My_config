@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 # 区域截图 → tesseract OCR（中英混合）→ 剪贴板，并弹通知显示前 120 字。
-# 语言可用 OCR_LANG 覆盖，默认 chi_sim+eng。
+#
+# 同 screenshot-annotate：选区走 niri 截图 UI（冻结画面），niri#2664 导致 CLI 调用
+# 立即返回，只能轮询等文件；临时图用完就删，不落进截图目录。
+# OCR_LANG 覆盖语言，默认 chi_sim+eng。
 set -euo pipefail
 
 lang="${OCR_LANG:-chi_sim+eng}"
 
-geometry=$(slurp) || exit 0
-
+command -v niri >/dev/null 2>&1 || { echo '需要 niri' >&2; exit 1; }
 tmp=$(mktemp --suffix=.png)
 trap 'rm -f -- "$tmp"' EXIT
-grim -g "$geometry" -- "$tmp"
+
+niri msg action screenshot --path "$tmp" >/dev/null || exit 1
+for _ in $(seq 1 600); do
+  [[ -s "$tmp" ]] && break
+  sleep 0.1
+done
+[[ -s "$tmp" ]] || exit 0
 
 # psm 6 = 当成一整块文本，比默认的自动分页更适合截代码/报错
 text=$(tesseract "$tmp" - -l "$lang" --psm 6 2>/dev/null | sed '/^[[:space:]]*$/d') || exit 1

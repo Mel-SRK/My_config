@@ -16,6 +16,16 @@ for bind in 'Mod\+Shift\+S.*screenshot-annotate' 'Mod\+Shift\+O.*ocr-region'; do
   pass "niri 绑定存在：$bind"
 done
 
+# 选区必须走 niri 截图 UI：grim+slurp 是实时画面，不冻结
+for file in local/bin/screenshot-annotate local/bin/ocr-region; do
+  grep -q 'niri msg action screenshot' "$ROOT/$file" || fail "使用 niri 截图 UI（冻结画面）：$file"
+  pass "使用 niri 截图 UI：$file"
+  if grep -v '^[[:space:]]*#' "$ROOT/$file" | grep -q 'slurp'; then
+    fail "不再用 slurp 选区（不冻结）：$file"
+  fi
+  pass "不再用 slurp 选区：$file"
+done
+
 # spawn 不继承登录 shell 的 PATH（niri 的 PATH 里没有 ~/.local/bin）
 # 引用用户脚本必须用 spawn-sh "exec ~/.local/bin/..."，否则键位按下去毫无反应
 while read -r cmd; do
