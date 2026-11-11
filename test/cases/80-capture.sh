@@ -16,6 +16,22 @@ for bind in 'Mod\+Shift\+S.*screenshot-annotate' 'Mod\+Shift\+O.*ocr-region'; do
   pass "niri 绑定存在：$bind"
 done
 
+# spawn 不继承登录 shell 的 PATH（niri 的 PATH 里没有 ~/.local/bin）
+# 引用用户脚本必须用 spawn-sh "exec ~/.local/bin/..."，否则键位按下去毫无反应
+while read -r cmd; do
+  [[ -n "$cmd" ]] || continue
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/bin command -v -- "$cmd" >/dev/null 2>&1 ||
+    fail "spawn 引用的 $cmd 在系统 PATH 里（否则改用 spawn-sh）"
+  pass "spawn 引用的 $cmd 在系统 PATH 里"
+done < <(sed -n 's/.*{[[:space:]]*spawn "\([^"]*\)".*/\1/p' "$ROOT/niri/config.kdl" | sort -u)
+
+while read -r target; do
+  [[ -n "$target" ]] || continue
+  path="${target/#\~/$HOME}"
+  [[ -x "$path" ]] || fail "spawn-sh 引用的脚本存在且可执行：$target"
+  pass "spawn-sh 引用：$target"
+done < <(sed -n 's/.*spawn-sh "exec \([^"]*\)".*/\1/p' "$ROOT/niri/config.kdl" | sort -u)
+
 # satty 的几个参数是版本敏感的，缺一个脚本就会失败
 if command -v satty >/dev/null 2>&1; then
   help=$(satty --help 2>&1)
