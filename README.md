@@ -15,6 +15,8 @@
 | `system-files/` | `/etc` 与 `/usr/local` 下手工改过的文件 |
 | `archive/` | 已退役方案，只作历史留档，不要部署 |
 | `tools/check-sync.sh` | 比对仓库与实机，只读 |
+| `migrations/` | 一次性状态修复脚本 |
+| `test/` | 本地测试集 |
 | `MANIFEST.tsv` | 仓库路径 ↔ 安装路径映射，安装与校验脚本都读它 |
 
 ## 当前环境
@@ -73,11 +75,8 @@ git clone https://github.com/Mel-SRK/My_config && cd My_config
 ./install.sh --apply    # 真正写入（root 条目仍只打印 sudo 命令）
 
 # 3. 收尾
-systemctl --user daemon-reload
-systemctl --user enable --now kanshi.service micmute-led-sync.service
-ln -sf ~/.config/tmux/.tmux.conf ~/.tmux.conf
-ln -sf ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local
-niri msg action load-config-file
+./tool/mycfg-post           # 从 MANIFEST 打印后续步骤
+./tool/mycfg-post --apply   # 执行 chmod 与 tmux 链接；systemctl 命令仍需自己跑
 ```
 
 `install.sh` 不会碰 `archive/`。装完想确认有没有漏同步：
@@ -90,6 +89,20 @@ niri msg action load-config-file
 `environment.d/` 里的变量要重新登录才对 niri 启动的应用生效。
 
 greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装完都不需要重启 greetd：前者在 greetd 下次启动时读，后者每次认证都重读一遍。**不要在图形会话里跑 `systemctl restart greetd`** —— greeter 会去抢 `vt = 1`，把当前 niri 会话挤成 inactive：桌面消失、进程还在，再登录会被 `niri-session` 的 `A niri session is already running.` 挡在门外。真要立刻生效，等登出到登录界面之后再重启。万一已经踩了：`loginctl list-sessions` 找到自己那个 seat0 会话，切到另一块 VT 跑 `loginctl activate <会话号>`；同一块 VT 被 greeter 占着就先 `sudo systemctl stop greetd`。
+
+## 迁移
+
+`tool/mycfg-migrate list` 列出待办（无待办时退出码为 3），`tool/mycfg-migrate run` 只打印计划，
+确认后用 `tool/mycfg-migrate run --apply` 严格按顺序执行。安装不会自动执行迁移。
+成功的迁移在 `${XDG_STATE_HOME:-$HOME/.local/state}/my_config/migrations` 下记录 marker；
+可用 `MYCONFIG_STATE_DIR` 覆盖整个目录。失败不记 marker，并停止后续迁移。
+配置退役后需要清理旧路径、或有一次性状态修复时写一条迁移，遵守 [迁移约定](migrations/README.md)。
+
+## 测试
+
+运行 `./test/run` 执行六个本地用例；`./test/run --host` 额外检查实机漂移。
+可以用 `./test/run --filter manifest` 筛选文件名。失败时看输出中的日志路径，
+每个用例的完整 stdout/stderr 都保留在打印的日志目录中。
 
 ## 外接显示器（kanshi）
 

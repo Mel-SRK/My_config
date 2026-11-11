@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/../lib/base-test.sh"
+
+for cmd in mktemp grep; do require_command "$cmd"; done
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+repo="$tmp/repo"
+mkdir -p "$repo/migrations"
+state="$tmp/state"
+
+cat > "$repo/migrations/001-ok.sh" <<'EOF'
+echo ok1
+EOF
+cat > "$repo/migrations/002-fail.sh" <<'EOF'
+echo fail
+exit 1
+EOF
+cat > "$repo/migrations/003-ok.sh" <<'EOF'
+echo ok3
+EOF
+
+run() { MYCONFIG_REPO="$repo" MYCONFIG_STATE_DIR="$state" HOME="$tmp/home" "$ROOT/tool/mycfg-migrate" "$@"; }
+
+run list >/dev/null && pass 'list 有待办时 exit 0' || fail 'list 有待办时 exit 0'
+assert_eq '001-ok.sh 002-fail.sh 003-ok.sh' "$(run list | paste -sd' ' -)" 'list 按文件名顺序列出待办'
+run >/dev/null
+[[ ! -e $state ]] || fail 'run 默认 dry-run 不建状态目录'
+pass 'run 默认 dry-run 不建状态目录'
+
+if out=$(run run --apply); then
+  fail '失败的迁移让 run --apply 退出非 0'
+fi
+pass '失败的迁移让 run --apply 退出非 0'
+[[ -e "$state/001-ok.sh" ]] || fail '成功的迁移写入 marker'
+pass '成功的迁移写入 marker'
+[[ ! -e "$state/002-fail.sh" ]] || fail '失败的迁移不写 marker'
+pass '失败的迁移不写 marker'
+[[ ! -e "$state/003-ok.sh" ]] || fail '失败后不执行后续迁移'
+pass '失败后不执行后续迁移'
+
+rm -f "$repo/migrations/002-fail.sh"
+printf 'sentinel\n' >> "$state/001-ok.sh"
+run run --apply >/dev/null || fail '修掉失败项后能跑完'
+pass '修掉失败项后能跑完'
+[[ -e "$state/003-ok.sh" ]] || fail '补跑未完成的迁移'
+pass '补跑未完成的迁移'
+grep -q sentinel "$state/001-ok.sh" || fail '已完成迁移不会重跑'
+pass '已完成迁移不会重跑'
+run list >/dev/null && fail '无待办时 list 应 exit 3' || pass '无待办时 list exit 3'
+
+violations=0
+for file in "$ROOT"/migrations/*.sh; do
+  [[ "$(stat -c %a -- "$file")" == 644 ]] || { echo "权限不是 644：$file" >&2; violations=$((violations+1)); }
+  head -n 1 -- "$file" | grep -q '^#!' && { echo "带了 shebang：$file" >&2; violations=$((violations+1)); }
+done
+[[ "$violations" -eq 0 ]] || fail '仓库里的迁移都是 0644 且无 shebang'
+pass '仓库里的迁移都是 0644 且无 shebang'

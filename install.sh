@@ -11,7 +11,6 @@ APPLY=0
 [ -f "$MANIFEST" ] || { echo "找不到 $MANIFEST"; exit 1; }
 
 root_cmds=()
-user_units=()
 count_user=0
 count_root=0
 greetd_changed=0
@@ -48,25 +47,10 @@ while IFS=$'\t' read -r src dst mode desc extra; do
   else
     echo "计划  $src  ->  $dst_exp"
   fi
-  case "$dst_exp" in
-    */.config/systemd/user/*.service) user_units+=("$(basename "$dst_exp")") ;;
-  esac
 done < "$MANIFEST"
 
 echo
 echo "user 条目 $count_user 个，root 条目 $count_root 个。"
-
-echo
-echo "===== 装完还要自己做的 ====="
-if [ "${#user_units[@]}" -gt 0 ]; then
-  echo "systemctl --user daemon-reload"
-  for u in "${user_units[@]}"; do echo "systemctl --user enable --now $u"; done
-fi
-echo "chmod +x ~/.local/bin/ctfdbg ~/.local/bin/ctfrun ~/.local/bin/hmcl-bin ~/.local/bin/micmute-led-sync.sh"
-echo "ln -sf ~/.config/tmux/.tmux.conf ~/.tmux.conf"
-echo "ln -sf ~/.config/tmux/.tmux.conf.local ~/.tmux.conf.local"
-echo "niri msg action load-config-file    # 重载 niri 配置"
-echo "重新登录，environment.d/ 里的环境变量才生效"
 
 if [ "$count_root" -gt 0 ]; then
   echo
@@ -89,6 +73,17 @@ if [ "$greetd_changed" -eq 1 ]; then
   echo
   echo "万一已经踩了：loginctl list-sessions  找到自己那个 seat0 会话号，"
   echo "  另一块 VT 上跑 loginctl activate <会话号>；同一块 VT 被 greeter 占着就先 sudo systemctl stop greetd。"
+fi
+
+echo
+echo "===== 装完还要自己做的 ====="
+"$REPO/tool/mycfg-post"
+pending=$("$REPO/tool/mycfg-migrate" list || true)
+if [ -n "$pending" ]; then
+  printf '%s\n' "$pending"
+  pending_count=0
+  while IFS= read -r migration; do pending_count=$((pending_count+1)); done <<< "$pending"
+  echo "migrations: $pending_count 条待办，跑 tool/mycfg-migrate run --apply"
 fi
 
 if [ "$APPLY" -eq 0 ]; then

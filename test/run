@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -uo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+export LC_ALL=C
+host=0
+filter=''
+usage() {
+  echo '用法：test/run [--host] [--filter 子串]' >&2
+  exit 2
+}
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --host) host=1; shift ;;
+    --filter)
+      [[ $# -ge 2 ]] || usage
+      filter="$2"
+      shift 2
+      ;;
+    *) usage ;;
+  esac
+done
+
+log_dir="${TMPDIR:-/tmp}/myconfig-test.$$"
+mkdir -p -- "$log_dir" || exit 1
+log_dir="$(cd -- "$log_dir" && pwd)" || exit 1
+total=0
+passed=0
+failed=0
+
+report() {
+  local status="$1" name="$2" log="$3" assertions
+  total=$((total+1))
+  if [[ "$status" -eq 0 ]]; then
+    passed=$((passed+1))
+    if [[ "$name" == 'host drift' ]]; then
+      echo 'ok - host drift'
+    else
+      assertions=$(grep -c '^ok ' "$log" || true)
+      printf 'ok - %s (%s)\n' "$name" "$assertions"
+    fi
+  else
+    failed=$((failed+1))
+    printf 'not ok - %s\n' "$name"
+    tail -n 15 -- "$log" | sed 's/^/    /'
+    printf '日志：%s\n' "$log"
+  fi
+}
+
+shopt -s nullglob
+for file in "$ROOT"/test/cases/*.sh; do
+  name="${file##*/}"
+  [[ "$name" == *"$filter"* ]] || continue
+  log="$log_dir/$name.log"
+  (cd -- "$ROOT" && bash "$file") >"$log" 2>&1
+  report "$?" "$name" "$log"
+done
+if [[ "$host" -eq 1 ]]; then
+  log="$log_dir/host-drift.log"
+  (cd -- "$ROOT" && bash "$ROOT/tools/check-sync.sh") >"$log" 2>&1
+  report "$?" 'host drift' "$log"
+fi
+printf '# 用例 %s，通过 %s，失败 %s\n' "$total" "$passed" "$failed"
+printf '日志目录：%s\n' "$log_dir"
+[[ "$failed" -eq 0 ]]

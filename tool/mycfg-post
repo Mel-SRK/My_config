@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+apply=0
+case "$#:${1:-}" in
+  0:) ;;
+  1:--apply) apply=1 ;;
+  *) echo '用法：tool/mycfg-post [--apply]' >&2; exit 2 ;;
+esac
+steps=0
+units=0
+while IFS=$'\t' read -r src dst mode desc extra; do
+  case "${src:-}" in ''|'#'*) continue ;; esac
+  [[ "$mode" == user ]] || continue
+  dst_exp="${dst/#\~/$HOME}"
+  if [[ "$dst" == '~/.local/bin/'* || "$src" == *.sh ]]; then
+    if [[ -f "$dst_exp" && ! -x "$dst_exp" ]]; then
+      printf 'chmod +x %q\n' "$dst_exp"
+      steps=$((steps+1))
+      if [[ "$apply" -eq 1 ]]; then chmod +x -- "$dst_exp"; fi
+    fi
+  fi
+  case "$dst_exp" in
+    */.config/systemd/user/*.service)
+      if [[ "$units" -eq 0 ]]; then echo 'systemctl --user daemon-reload'; fi
+      printf 'systemctl --user enable --now %q\n' "${dst_exp##*/}"
+      units=$((units+1))
+      steps=$((steps+1))
+      ;;
+  esac
+done < "$REPO/MANIFEST.tsv"
+
+# tmux's two entry points are the only post-install paths outside MANIFEST.
+for name in .tmux.conf .tmux.conf.local; do
+  target="$HOME/.config/tmux/$name"
+  link="$HOME/$name"
+  if [[ ! -L "$link" || "$(readlink -m -- "$link")" != "$(readlink -m -- "$target")" ]]; then
+    printf 'ln -sfn %q %q\n' "$target" "$link"
+    steps=$((steps+1))
+    if [[ "$apply" -eq 1 ]]; then ln -sfn -- "$target" "$link"; fi
+  fi
+done
+if [[ "$steps" -eq 0 ]]; then echo '无后续步骤'; fi
+echo 'niri msg action load-config-file'
+echo '重新登录后 environment.d/ 才生效'
+echo 'root 条目仍需按 install.sh 打印的 sudo 命令自己跑'
