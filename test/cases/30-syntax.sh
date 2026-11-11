@@ -16,6 +16,11 @@ while IFS= read -r file; do
   bash -n "$ROOT/$file" || fail 'bash 语法' "$file"
   pass "bash 语法：$file"
 done <<< "$files"
+# tool/ 下的脚本没有 .sh 后缀，git ls-files '*.sh' 扫不到
+for file in "$ROOT"/tool/mycfg-*; do
+  bash -n "$file" || fail 'bash 语法' "tool/${file##*/}"
+  pass "bash 语法：tool/${file##*/}"
+done
 if command -v zsh >/dev/null 2>&1; then
   for file in home/.zshrc p10k/.p10k.zsh; do
     zsh -n "$ROOT/$file" || fail 'zsh 语法' "$file"

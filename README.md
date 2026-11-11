@@ -15,6 +15,7 @@
 | `system-files/` | `/etc` 与 `/usr/local` 下手工改过的文件 |
 | `archive/` | 已退役方案，只作历史留档，不要部署 |
 | `tools/check-sync.sh` | 比对仓库与实机，只读 |
+| `packages/` | 重装时要装的包清单（official / foreign） |
 | `migrations/` | 一次性状态修复脚本 |
 | `test/` | 本地测试集 |
 | `MANIFEST.tsv` | 仓库路径 ↔ 安装路径映射，安装与校验脚本都读它 |
@@ -100,9 +101,22 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 
 ## 测试
 
-运行 `./test/run` 执行六个本地用例；`./test/run --host` 额外检查实机漂移。
+运行 `./test/run` 执行七个本地用例；`./test/run --host` 额外检查实机漂移。
 可以用 `./test/run --filter manifest` 筛选文件名。失败时看输出中的日志路径，
 每个用例的完整 stdout/stderr 都保留在打印的日志目录中。
+
+## 软件包
+
+`packages/official.txt` 是官方仓库的显式安装，`packages/foreign.txt` 是 AUR 或手工编译的，
+只记包名不记版本。三档用法：
+
+```bash
+./tool/mycfg-pkgs check            # 缺哪些、哪些装了但没记录
+./tool/mycfg-pkgs write --apply    # 按当前机器重写清单（默认只预览 diff）
+./tool/mycfg-pkgs install          # 打印补齐命令，不执行
+```
+
+换机器或重装后先 `install` 再 `./install.sh`，配置文件才有地方落。`install.sh` 结尾会自动提示缺包数量。
 
 ## 外接显示器（kanshi）
 

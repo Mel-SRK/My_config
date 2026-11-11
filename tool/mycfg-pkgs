@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# 记录重装系统时该装哪些包：official 是官方仓库的显式安装，foreign 是 AUR/手工编译的。
+# 只记显式安装（-Qe），不记依赖；版本号不记，避免每次升级都产生噪音。
+set -uo pipefail
+REPO="${MYCONFIG_REPO:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}" || exit 1
+DIR="$REPO/packages"
+export LC_ALL=C
+
+usage() {
+  echo '用法：tool/mycfg-pkgs [check [--summary] | write [--apply] | install]' >&2
+  exit 2
+}
+
+require_pacman() {
+  command -v pacman >/dev/null 2>&1 || { echo '找不到 pacman' >&2; exit 1; }
+}
+
+# 输出排序后的包名，一个一行
+installed() {
+  case "$1" in
+    official) pacman -Qen | awk '{print $1}' ;;
+    foreign)  pacman -Qem | awk '{print $1}' ;;
+  esac | LC_ALL=C sort
+}
+
+recorded() {
+  [[ -f "$DIR/$1.txt" ]] || return 0
+  awk 'NF && $1 !~ /^#/ {print $1}' "$DIR/$1.txt" | LC_ALL=C sort
+}
+
+collect() {
+  local kind=$1 tmp=$2
+  installed "$kind" > "$tmp/installed"
+  recorded "$kind" > "$tmp/recorded"
+  comm -23 "$tmp/recorded" "$tmp/installed" > "$tmp/missing"
+  comm -13 "$tmp/recorded" "$tmp/installed" > "$tmp/extra"
+}
+
+case "${1:-check}" in
+  check)
+    [[ $# -le 2 ]] || usage
+    [[ "${2:-}" == --summary || $# -eq 1 ]] || usage
+    require_pacman
+    tmp=$(mktemp -d) || exit 1
+    trap 'rm -rf "$tmp"' EXIT
+    total_missing=0
+    total_extra=0
+    for kind in official foreign; do
+      collect "$kind" "$tmp"
+      missing=$(wc -l < "$tmp/missing")
+      extra=$(wc -l < "$tmp/extra")
+      total_missing=$((total_missing+missing))
+      total_extra=$((total_extra+extra))
+      if [[ "${2:-}" != --summary ]]; then
+        [[ "$missing" -eq 0 ]] || { echo "缺（$kind）："; sed 's/^/  /' "$tmp/missing" | head -20; }
+        [[ "$extra" -eq 0 ]] || { echo "未记录（$kind）："; sed 's/^/  /' "$tmp/extra" | head -20; }
+      fi
+    done
+    echo "包：缺 $total_missing，未记录 $total_extra（记录用 tool/mycfg-pkgs write --apply）"
+    [[ "$total_missing" -eq 0 ]]
+    ;;
+  write)
+    [[ $# -le 2 ]] || usage
+    apply=0
+    [[ "${2:-}" == --apply ]] && apply=1
+    [[ $# -eq 1 || "${2:-}" == --apply ]] || usage
+    require_pacman
+    tmp=$(mktemp -d) || exit 1
+    trap 'rm -rf "$tmp"' EXIT
+    mkdir -p "$DIR"
+    for kind in official foreign; do
+      installed "$kind" > "$tmp/new"
+      recorded "$kind" > "$tmp/old"
+      added=$(comm -13 "$tmp/old" "$tmp/new" | wc -l)
+      removed=$(comm -23 "$tmp/old" "$tmp/new" | wc -l)
+      echo "$kind：新增 $added，移除 $removed"
+      if [[ "$apply" -eq 1 ]]; then
+        cp -- "$tmp/new" "$DIR/$kind.txt"
+        echo "  已写入 packages/$kind.txt（$(wc -l < "$DIR/$kind.txt") 个）"
+      elif [[ "$added" -gt 0 || "$removed" -gt 0 ]]; then
+        diff -u "$tmp/old" "$tmp/new" | sed -n '3,$p' | sed 's/^/  /' | head -20
+      fi
+    done
+    [[ "$apply" -eq 1 ]] || echo "以上只是预览。写入：tool/mycfg-pkgs write --apply"
+    ;;
+  install)
+    [[ $# -eq 1 ]] || usage
+    require_pacman
+    tmp=$(mktemp -d) || exit 1
+    trap 'rm -rf "$tmp"' EXIT
+    missing_official=0
+    missing_foreign=0
+    for kind in official foreign; do
+      collect "$kind" "$tmp"
+      count=$(wc -l < "$tmp/missing")
+      if [[ "$kind" == official ]]; then missing_official=$count; else missing_foreign=$count; fi
+      if [[ "$count" -gt 0 ]]; then
+        mapfile -t names < "$tmp/missing"
+        if [[ "$kind" == official ]]; then
+          echo "sudo pacman -S --needed ${names[*]}"
+        elif command -v yay >/dev/null 2>&1; then
+          echo "yay -S --needed ${names[*]}"
+        elif command -v paru >/dev/null 2>&1; then
+          echo "paru -S --needed ${names[*]}"
+        else
+          echo "# foreign 包需要 AUR helper：${names[*]}"
+        fi
+      fi
+    done
+    [[ $((missing_official+missing_foreign)) -eq 0 ]] && echo '没有缺的包'
+    ;;
+  *) usage ;;
+esac

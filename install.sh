@@ -79,6 +79,12 @@ echo
 echo "===== 装完还要自己做的 ====="
 "$REPO/tool/mycfg-post"
 pending=$("$REPO/tool/mycfg-migrate" list || true)
+pkgs=$("$REPO/tool/mycfg-pkgs" check --summary 2>/dev/null || true)
+case "$pkgs" in
+  *'缺 0'*|'') ;;
+  *) echo; echo "$pkgs"; echo "装包命令：tool/mycfg-pkgs install" ;;
+esac
+
 if [ -n "$pending" ]; then
   printf '%s\n' "$pending"
   pending_count=0
