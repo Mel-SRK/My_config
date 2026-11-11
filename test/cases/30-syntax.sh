@@ -16,10 +16,20 @@ while IFS= read -r file; do
   bash -n "$ROOT/$file" || fail 'bash 语法' "$file"
   pass "bash 语法：$file"
 done <<< "$files"
-# tool/ 下的脚本没有 .sh 后缀，git ls-files '*.sh' 扫不到
-for file in "$ROOT"/tool/mycfg-*; do
-  bash -n "$file" || fail 'bash 语法' "tool/${file##*/}"
-  pass "bash 语法：tool/${file##*/}"
+# tool/ 和 local/bin 下的脚本没有 .sh 后缀，git ls-files '*.sh' 扫不到
+for file in "$ROOT"/tool/mycfg-* "$ROOT"/local/bin/*; do
+  [[ -f "$file" ]] || continue
+  case "$(head -n 1 -- "$file")" in
+    *python*)
+      python3 -c 'import sys; compile(open(sys.argv[1]).read(), sys.argv[1], "exec")' "$file" ||
+        fail 'python 语法' "${file#"$ROOT"/}"
+      pass "python 语法：${file#"$ROOT"/}"
+      ;;
+    *)
+      bash -n "$file" || fail 'bash 语法' "${file#"$ROOT"/}"
+      pass "bash 语法：${file#"$ROOT"/}"
+      ;;
+  esac
 done
 if command -v zsh >/dev/null 2>&1; then
   for file in home/.zshrc p10k/.p10k.zsh; do

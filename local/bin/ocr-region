@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# 区域截图 → tesseract OCR（中英混合）→ 剪贴板，并弹通知显示前 120 字。
+# 语言可用 OCR_LANG 覆盖，默认 chi_sim+eng。
+set -euo pipefail
+
+lang="${OCR_LANG:-chi_sim+eng}"
+
+geometry=$(slurp) || exit 0
+
+tmp=$(mktemp --suffix=.png)
+trap 'rm -f -- "$tmp"' EXIT
+grim -g "$geometry" -- "$tmp"
+
+# psm 6 = 当成一整块文本，比默认的自动分页更适合截代码/报错
+text=$(tesseract "$tmp" - -l "$lang" --psm 6 2>/dev/null | sed '/^[[:space:]]*$/d') || exit 1
+
+if [[ -z "$text" ]]; then
+  notify-send -a ocr 'OCR' '没识别到文字'
+  exit 1
+fi
+
+printf '%s\n' "$text" | wl-copy
+preview=$(printf '%s' "$text" | head -c 120 | tr '\n' ' ')
+notify-send -a ocr 'OCR 已复制到剪贴板' "$preview"

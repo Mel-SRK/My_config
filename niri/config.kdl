@@ -177,6 +177,8 @@ binds {
     // 自定义快捷键
     Mod+E hotkey-overlay-title="Files Manger" { spawn "nautilus"; }
     Alt+A { screenshot; }
+    Mod+Shift+S hotkey-overlay-title="Screenshot & Annotate" { spawn "screenshot-annotate"; }
+    Mod+Shift+O hotkey-overlay-title="OCR Region" { spawn "ocr-region"; }
     Ctrl+Alt+Right hotkey-overlay-title="Media Next" { spawn "noctalia" "msg" "media" "next"; }
     Ctrl+Alt+Left hotkey-overlay-title="Media Previous" { spawn "noctalia" "msg" "media" "previous"; }
     Mod+B hotkey-overlay-title="Clipboard" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }

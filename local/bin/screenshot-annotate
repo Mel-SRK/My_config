@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# 区域截图 → satty 标注 → Enter 复制到剪贴板并同时存盘，Esc 退出不保存。
+# 存盘目录可用 SCREENSHOT_DIR 覆盖。
+set -euo pipefail
+
+dir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
+mkdir -p -- "$dir"
+
+# Esc 取消选区时 slurp 退出码非 0，直接放弃，不要往下走
+geometry=$(slurp -b '#00000080' -c '#7aa2f7ff') || exit 0
+
+tmp=$(mktemp --suffix=.png)
+trap 'rm -f -- "$tmp"' EXIT
+grim -g "$geometry" -- "$tmp"
+
+satty --filename "$tmp" \
+  --copy-command wl-copy \
+  --save-after-copy \
+  --output-filename "$dir/%Y-%m-%d %H-%M-%S.png" \
+  --actions-on-enter save-to-clipboard \
+  --actions-on-escape exit \
+  --early-exit copy

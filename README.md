@@ -44,8 +44,13 @@ niri（`Super` 即 Mod）：
 | `Mod+R` / `Mod+Shift+R` | 切换列宽 / 窗高预设；`Mod+F` maximize 列 |
 | `Mod+V` 浮动、`Mod+W` 列内 tab 切换、`Mod+Q` 关窗 | |
 | `Mod+Shift+E` | 重载配置（`Ctrl+Alt+Delete` 退出 niri） |
+| `Mod+Shift+S` | 区域截图 → satty 标注，Enter 复制并存盘到 `~/Pictures/Screenshots` |
+| `Mod+Shift+O` | 区域截图 → tesseract OCR（中英）→ 剪贴板 |
+| `Print` / `Ctrl+Print` / `Alt+Print` | niri 内置：选区 / 整屏 / 窗口，直接进剪贴板 |
 
 媒体键 `Ctrl+Alt+Left/Right` 或 `XF86AudioPrev/Next`，亮度走 `noctalia msg brightness-up/down`（不再用 brightnessctl）。
+
+截图分两套：`Print` 系走 niri 内置，快，适合立刻要图；`Mod+Shift+S` 起 satty 可画箭头/方框/马赛克，`Mod+Shift+O` 把选中区域的文字识别进剪贴板（`chi_sim+eng`，截代码和报错用）。脚本在 `local/bin/screenshot-annotate`、`local/bin/ocr-region`。
 
 tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 `Ctrl+b`）。新建窗口 `Ctrl+x` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
 

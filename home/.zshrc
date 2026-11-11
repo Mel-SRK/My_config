@@ -85,6 +85,11 @@ if (( __have_tty )); then
     alias ll="ls -la"
     alias la="ls -A"
 
+    # fzf：Ctrl+R 历史、Ctrl+T 文件、Alt+C 跳目录、**<Tab> 补全
+    if command -v fzf >/dev/null 2>&1; then
+        source <(fzf --zsh)
+    fi
+
     # p10k 配置
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
