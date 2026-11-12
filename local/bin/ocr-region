@@ -28,5 +28,6 @@ if [[ -z "$text" ]]; then
 fi
 
 printf '%s\n' "$text" | wl-copy
-preview=$(printf '%s' "$text" | head -c 120 | tr '\n' ' ')
+preview=${text:0:120}
+preview=${preview//$'\n'/ }
 notify-send -a ocr 'OCR 已复制到剪贴板' "$preview"

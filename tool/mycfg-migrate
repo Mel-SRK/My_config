@@ -22,6 +22,24 @@ case "$command_name" in
   *) usage ;;
 esac
 
+marker_tmp=''
+if [[ "$apply" -eq 1 ]]; then
+  mkdir -p -- "$STATE" || exit 1
+  # Lock before collecting pending work, so an overlapping runner cannot use
+  # a stale pending list or execute the same migration twice.
+  if ! mkdir -- "$STATE/.lock"; then
+    echo "迁移锁不可用：$STATE/.lock（若进程已被强制终止，请确认后手动清理）" >&2
+    exit 1
+  fi
+  cleanup() {
+    [[ -z "$marker_tmp" ]] || rm -f -- "$marker_tmp"
+    rmdir -- "$STATE/.lock"
+  }
+  trap cleanup EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+fi
+
 pending=()
 shopt -s nullglob
 for file in "$REPO"/migrations/*.sh; do
@@ -42,10 +60,11 @@ for file in "${pending[@]}"; do
   name="${file##*/}"
   printf '==> %s\n' "$name"
   if (cd "$REPO" && MYCONFIG_REPO="$REPO" bash -euo pipefail "$file"); then
-    if mkdir -p -- "$STATE" && date -Is > "$STATE/$name"; then
+    if marker_tmp=$(mktemp -- "$STATE/.marker.XXXXXX") &&
+       date -Is > "$marker_tmp" && mv -T -- "$marker_tmp" "$STATE/$name"; then
+      marker_tmp=''
       continue
     fi
-    rm -f -- "$STATE/$name"
   fi
   printf '失败，已停在 %s，后续迁移未执行\n' "$name" >&2
   exit 1

@@ -9,7 +9,7 @@ case "$#:${1:-}" in
 esac
 steps=0
 units=0
-while IFS=$'\t' read -r src dst mode desc extra; do
+while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
   case "${src:-}" in ''|'#'*) continue ;; esac
   [[ "$mode" == user ]] || continue
   dst_exp="${dst/#\~/$HOME}"
@@ -35,9 +35,9 @@ for name in .tmux.conf .tmux.conf.local; do
   target="$HOME/.config/tmux/$name"
   link="$HOME/$name"
   if [[ ! -L "$link" || "$(readlink -m -- "$link")" != "$(readlink -m -- "$target")" ]]; then
-    printf 'ln -sfn %q %q\n' "$target" "$link"
+    printf 'ln -sfnT %q %q\n' "$target" "$link"
     steps=$((steps+1))
-    if [[ "$apply" -eq 1 ]]; then ln -sfn -- "$target" "$link"; fi
+    if [[ "$apply" -eq 1 ]]; then ln -sfnT -- "$target" "$link"; fi
   fi
 done
 if [[ "$steps" -eq 0 ]]; then echo '无后续步骤'; fi

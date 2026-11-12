@@ -2,11 +2,15 @@
 # 按 MANIFEST.tsv 把仓库里的配置装回实机。
 # 默认只打印计划；确认无误后加 --apply 才真正写入。
 # root 权限的那些条目永远只打印 sudo 命令，不自己执行。
-set -u
+set -euo pipefail
 REPO="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
 MANIFEST="$REPO/MANIFEST.tsv"
 APPLY=0
-[ "${1:-}" = "--apply" ] && APPLY=1
+case "$#:${1:-}" in
+  0:) ;;
+  1:--apply) APPLY=1 ;;
+  *) echo '用法：install.sh [--apply]' >&2; exit 2 ;;
+esac
 
 [ -f "$MANIFEST" ] || { echo "找不到 $MANIFEST"; exit 1; }
 
@@ -15,15 +19,21 @@ count_user=0
 count_root=0
 greetd_changed=0
 
-while IFS=$'\t' read -r src dst mode desc extra; do
+while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
   case "${src:-}" in ''|'#'*) continue ;; esac
+  [[ -e "$REPO/$src" && ( "$dst" == '~/'* || "$dst" == /* ) && ( "$mode" == user || "$mode" == root ) ]] || {
+    printf '无效 MANIFEST 条目：%s\n' "$src" >&2
+    exit 1
+  }
   dst_exp="${dst/#\~/$HOME}"
   if [ "$mode" = "root" ]; then
     count_root=$((count_root+1))
     if [ -d "$REPO/$src" ]; then
-      root_cmds+=("sudo cp -a '$REPO/$src/.' '$dst/'")
+      printf -v command_line 'sudo cp -a -- %q %q' "$REPO/$src/." "$dst/"
+      root_cmds+=("$command_line")
     else
-      root_cmds+=("sudo install -Dm644 '$REPO/$src' '$dst'")
+      printf -v command_line 'sudo install -Dm644 -- %q %q' "$REPO/$src" "$dst"
+      root_cmds+=("$command_line")
       # /etc/greetd 或 /etc/pam.d/greetd 这次要动的话，下面得配一句警告
       case "$dst" in
         /etc/greetd/*|/etc/pam.d/greetd)

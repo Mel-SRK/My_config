@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 记录重装系统时该装哪些包：official 是官方仓库的显式安装，foreign 是 AUR/手工编译的。
 # 只记显式安装（-Qe），不记依赖；版本号不记，避免每次升级都产生噪音。
-set -uo pipefail
+set -euo pipefail
 REPO="${MYCONFIG_REPO:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}" || exit 1
 DIR="$REPO/packages"
 export LC_ALL=C
@@ -17,10 +17,16 @@ require_pacman() {
 
 # 输出排序后的包名，一个一行
 installed() {
+  local status=0
+  # pacman also returns 1 for an empty selection. Only that silent, empty
+  # result is valid; database errors must never turn into replacement lists.
   case "$1" in
-    official) pacman -Qen | awk '{print $1}' ;;
-    foreign)  pacman -Qem | awk '{print $1}' ;;
-  esac | LC_ALL=C sort
+    official) pacman -Qen > "$tmp/query" 2> "$tmp/query.err" || status=$? ;;
+    foreign)  pacman -Qem > "$tmp/query" 2> "$tmp/query.err" || status=$? ;;
+  esac
+  cat "$tmp/query.err" >&2
+  [[ "$status" -eq 0 || ( "$status" -eq 1 && ! -s "$tmp/query" && ! -s "$tmp/query.err" ) ]] || return 1
+  awk '{print $1}' "$tmp/query" | LC_ALL=C sort
 }
 
 recorded() {
@@ -30,19 +36,21 @@ recorded() {
 
 collect() {
   local kind=$1 tmp=$2
-  installed "$kind" > "$tmp/installed"
+  cp -- "$tmp/$kind" "$tmp/installed"
   recorded "$kind" > "$tmp/recorded"
   comm -23 "$tmp/recorded" "$tmp/installed" > "$tmp/missing"
   comm -13 "$tmp/recorded" "$tmp/installed" > "$tmp/extra"
 }
 
-case "${1:-check}" in
+[[ $# -gt 0 ]] || set -- check
+case "$1" in
   check)
     [[ $# -le 2 ]] || usage
     [[ "${2:-}" == --summary || $# -eq 1 ]] || usage
     require_pacman
     tmp=$(mktemp -d) || exit 1
     trap 'rm -rf "$tmp"' EXIT
+    for kind in official foreign; do installed "$kind" > "$tmp/$kind"; done
     total_missing=0
     total_extra=0
     for kind in official foreign; do
@@ -52,8 +60,8 @@ case "${1:-check}" in
       total_missing=$((total_missing+missing))
       total_extra=$((total_extra+extra))
       if [[ "${2:-}" != --summary ]]; then
-        [[ "$missing" -eq 0 ]] || { echo "缺（$kind）："; sed 's/^/  /' "$tmp/missing" | head -20; }
-        [[ "$extra" -eq 0 ]] || { echo "未记录（$kind）："; sed 's/^/  /' "$tmp/extra" | head -20; }
+        [[ "$missing" -eq 0 ]] || { echo "缺（$kind）："; sed -n '1,20{s/^/  /;p;}' "$tmp/missing"; }
+        [[ "$extra" -eq 0 ]] || { echo "未记录（$kind）："; sed -n '1,20{s/^/  /;p;}' "$tmp/extra"; }
       fi
     done
     echo "包：缺 $total_missing，未记录 $total_extra（记录用 tool/mycfg-pkgs write --apply）"
@@ -67,9 +75,10 @@ case "${1:-check}" in
     require_pacman
     tmp=$(mktemp -d) || exit 1
     trap 'rm -rf "$tmp"' EXIT
-    mkdir -p "$DIR"
+    for kind in official foreign; do installed "$kind" > "$tmp/$kind"; done
+    if [[ "$apply" -eq 1 ]]; then mkdir -p -- "$DIR"; fi
     for kind in official foreign; do
-      installed "$kind" > "$tmp/new"
+      cp -- "$tmp/$kind" "$tmp/new"
       recorded "$kind" > "$tmp/old"
       added=$(comm -13 "$tmp/old" "$tmp/new" | wc -l)
       removed=$(comm -23 "$tmp/old" "$tmp/new" | wc -l)
@@ -78,7 +87,7 @@ case "${1:-check}" in
         cp -- "$tmp/new" "$DIR/$kind.txt"
         echo "  已写入 packages/$kind.txt（$(wc -l < "$DIR/$kind.txt") 个）"
       elif [[ "$added" -gt 0 || "$removed" -gt 0 ]]; then
-        diff -u "$tmp/old" "$tmp/new" | sed -n '3,$p' | sed 's/^/  /' | head -20
+        diff -u "$tmp/old" "$tmp/new" | sed -n '3,22{s/^/  /;p;}' || [[ $? -eq 1 ]]
       fi
     done
     [[ "$apply" -eq 1 ]] || echo "以上只是预览。写入：tool/mycfg-pkgs write --apply"
@@ -88,6 +97,7 @@ case "${1:-check}" in
     require_pacman
     tmp=$(mktemp -d) || exit 1
     trap 'rm -rf "$tmp"' EXIT
+    for kind in official foreign; do installed "$kind" > "$tmp/$kind"; done
     missing_official=0
     missing_foreign=0
     for kind in official foreign; do
@@ -107,7 +117,7 @@ case "${1:-check}" in
         fi
       fi
     done
-    [[ $((missing_official+missing_foreign)) -eq 0 ]] && echo '没有缺的包'
+    if [[ $((missing_official+missing_foreign)) -eq 0 ]]; then echo '没有缺的包'; fi
     ;;
   *) usage ;;
 esac

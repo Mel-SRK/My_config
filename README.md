@@ -106,7 +106,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 
 ## 测试
 
-运行 `./test/run` 执行七个本地用例；`./test/run --host` 额外检查实机漂移。
+运行 `./test/run` 执行 `test/cases/` 下的本地用例；`./test/run --host` 额外检查实机漂移。
 可以用 `./test/run --filter manifest` 筛选文件名。失败时看输出中的日志路径，
 每个用例的完整 stdout/stderr 都保留在打印的日志目录中。
 
@@ -121,7 +121,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 ./tool/mycfg-pkgs install          # 打印补齐命令，不执行
 ```
 
-换机器或重装后先 `install` 再 `./install.sh`，配置文件才有地方落。`install.sh` 结尾会自动提示缺包数量。
+换机器或重装后先运行 `tool/mycfg-pkgs install` 并手动执行它打印的装包命令，再运行 `./install.sh`。`install.sh` 结尾会自动提示缺包数量。
 
 ## 外接显示器（kanshi）
 

@@ -36,5 +36,12 @@ assert_eq "$tmp/home/.config/tmux/.tmux.conf.local" "$(readlink -m -- "$tmp/home
 pass '--apply 不执行 systemctl'
 
 out=$(HOME="$tmp/home" "$ROOT/tool/mycfg-post")
-grep -q '无后续步骤' <<< "$out" && fail '收尾后不该还有步骤' "$out"
+if grep -qE '^(chmod |ln )' <<< "$out"; then fail '收尾后不该还有 chmod 或链接步骤' "$out"; fi
 pass '收尾后不再列出可执行位和链接'
+
+mkdir -p "$tmp/directory-home/.tmux.conf"
+status=0
+HOME="$tmp/directory-home" "$ROOT/tool/mycfg-post" --apply >/dev/null 2>&1 || status=$?
+assert_eq 1 "$status" 'tmux 入口为真实目录时失败而不在其中建链接'
+[[ -z "$(find "$tmp/directory-home/.tmux.conf" -mindepth 1 -print -quit)" ]] || fail '原有 tmux 目录保持不变'
+pass '原有 tmux 目录保持不变'

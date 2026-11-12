@@ -20,8 +20,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-log_dir="${TMPDIR:-/tmp}/myconfig-test.$$"
-mkdir -p -- "$log_dir" || exit 1
+log_dir=$(mktemp -d -- "${TMPDIR:-/tmp}/myconfig-test.XXXXXX") || exit 1
 log_dir="$(cd -- "$log_dir" && pwd)" || exit 1
 total=0
 passed=0

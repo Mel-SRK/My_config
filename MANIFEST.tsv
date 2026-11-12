@@ -1,4 +1,4 @@
-# 仓库路径	安装路径	权限	说明	extra(state 仅表示运行时状态，check-sync 不计漂移)
+# TSV：仓库路径、安装路径、权限(user/root)、说明四个必填字段；可选第五字段 state 表示运行时状态（check-sync 不计内容漂移，缺失仍失败）
 niri/config.kdl	~/.config/niri/config.kdl	user	niri 主配置：输出、键位、启动项
 niri/noctalia.kdl	~/.config/niri/noctalia.kdl	user	niri 焦点框/边框配色
 alacritty/	~/.config/alacritty/	user	终端 + noctalia 主题
