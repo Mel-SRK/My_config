@@ -176,7 +176,6 @@ binds {
 
     // 自定义快捷键
     Mod+E hotkey-overlay-title="Files Manger" { spawn "nautilus"; }
-    Alt+A { screenshot; }
     // spawn 不走 shell，niri 自己的 PATH 里没有 ~/.local/bin，必须显式展开
     Mod+Shift+S hotkey-overlay-title="Screenshot & Annotate" { spawn-sh "exec ~/.local/bin/screenshot-annotate"; }
     Mod+Shift+O hotkey-overlay-title="OCR Region" { spawn-sh "exec ~/.local/bin/ocr-region"; }
