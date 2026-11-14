@@ -48,12 +48,19 @@ case ":$PATH:" in
 esac
 export EDITOR="nvim"
 export VISUAL="nvim"
-export QT_QPA_PLATFORMTHEME=qt5ct
+# 与 environment.d/qt-theme.conf 一致；覆盖旧会话继承的 qt5ct。
+export QT_QPA_PLATFORMTHEME=qt6ct
 
 # Clash Verge 代理
 export http_proxy=http://127.0.0.1:7897
 export https_proxy=http://127.0.0.1:7897
 export all_proxy=socks5://127.0.0.1:7897
+# 本地开发服务直连；保留已有例外。
+typeset -aU __proxy_bypass
+__proxy_bypass=(localhost 127.0.0.1 ::1 "${(@s:,:)no_proxy}" "${(@s:,:)NO_PROXY}")
+export no_proxy="${(j:,:)__proxy_bypass:#}"
+export NO_PROXY="$no_proxy"
+unset __proxy_bypass
 
 if (( __have_tty )); then
     # Enable Powerlevel10k instant prompt
@@ -93,9 +100,13 @@ if (( __have_tty )); then
     # p10k 配置
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-    #fuck
-    eval $(thefuck --alias)
+    # 可选工具：未安装时不影响 shell 启动。
+    if command -v thefuck >/dev/null 2>&1; then
+        eval "$(thefuck --alias)"
+    fi
 
     # Oh-my-pi
-    eval "$(omp completions zsh)"
+    if command -v omp >/dev/null 2>&1; then
+        eval "$(omp completions zsh)"
+    fi
 fi

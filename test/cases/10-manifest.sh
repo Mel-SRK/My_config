@@ -40,8 +40,9 @@ while IFS= read -r line; do
   [[ "$mode" == user || "$mode" == root ]] || fail "$label mode 合法" "$mode"
   [[ -z "$extra" || "$extra" == state ]] || fail "$label extra 合法" "$extra"
   [[ -e "$ROOT/$src" ]] || fail "$label src 存在" "$src"
-  git -C "$ROOT" ls-files --error-unmatch -- "$src" >/dev/null 2>&1 ||
-    fail "$label src 被 git 跟踪" "$src"
+  # 新增配置应能在 git add 前测试，但不能被忽略而在提交时遗漏。
+  git -C "$ROOT" ls-files --cached --others --exclude-standard --error-unmatch -- "$src" >/dev/null 2>&1 ||
+    fail "$label src 被 git 跟踪或为非忽略的新文件" "$src"
   [[ "$src" != archive/* ]] || fail "$label src 不在 archive/" "$src"
   [[ "$dst" == '~/'* || "$dst" == /* ]] || fail "$label dst 为安装路径" "$dst"
   # A trailing slash or ~/ versus an absolute HOME path denotes the same destination.
@@ -52,3 +53,11 @@ while IFS= read -r line; do
   destinations["$dst_key"]="$src"
   pass "$label：$src"
 done < "$manifest"
+
+# 活跃 systemd 配置必须进入部署清单，防止文件存在但恢复时遗漏。
+while IFS= read -r -d '' file; do
+  src="${file#"$ROOT/"}"
+  awk -F '\t' -v src="$src" '$1 == src { found=1 } END { exit !found }' "$manifest" ||
+    fail 'systemd 配置纳入 MANIFEST' "$src"
+  pass "systemd 部署覆盖：$src"
+done < <(find "$ROOT/systemd/user" -type f -print0)

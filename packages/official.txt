@@ -118,6 +118,7 @@ python-gmpy2
 python-mcp
 python-pip
 python-pwntools
+python-pyghidra
 python-pymupdf
 python-pynvim
 python-python-docx

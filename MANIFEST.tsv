@@ -6,12 +6,21 @@ fontconfig/fonts.conf	~/.config/fontconfig/fonts.conf	user	字体渲染
 gtk-3.0/settings.ini	~/.config/gtk-3.0/settings.ini	user	GTK3 暗色
 gtk-4.0/settings.ini	~/.config/gtk-4.0/settings.ini	user	GTK4 暗色
 environment.d/	~/.config/environment.d/	user	登录级环境变量（重新登录生效）
-kanshi/config	~/.config/kanshi/config	user	外接屏 profile（docked / mobile）
-fcitx5/	~/.config/fcitx5/	user	输入法配置与 profile
+kanshi/config	~/.config/kanshi/config	user	外接屏 profile（docked-dp1 / docked-dp2 / mobile）
+fcitx5/config	~/.config/fcitx5/config	user	输入法快捷键与行为
+fcitx5/profile	~/.config/fcitx5/profile	user	输入法组与当前默认输入法	state
+fcitx5/conf/chttrans.conf	~/.config/fcitx5/conf/chttrans.conf	user	输入法组件配置
+fcitx5/conf/classicui.conf	~/.config/fcitx5/conf/classicui.conf	user	输入法组件配置
+fcitx5/conf/cloudpinyin.conf	~/.config/fcitx5/conf/cloudpinyin.conf	user	输入法组件配置
+fcitx5/conf/kimpanel.conf	~/.config/fcitx5/conf/kimpanel.conf	user	输入法组件配置
+fcitx5/conf/notifications.conf	~/.config/fcitx5/conf/notifications.conf	user	输入法组件配置
+fcitx5/conf/pinyin.conf	~/.config/fcitx5/conf/pinyin.conf	user	输入法组件配置
+fcitx5/conf/punctuation.conf	~/.config/fcitx5/conf/punctuation.conf	user	输入法组件配置
+fcitx5/conf/spell.conf	~/.config/fcitx5/conf/spell.conf	user	输入法组件配置
 noctalia/config.toml	~/.config/noctalia/config.toml	user	noctalia v5 声明式配置
 noctalia/settings.toml	~/.local/state/noctalia/settings.toml	user	noctalia 运行时状态（GUI 改写、壁纸轮换，会漂）	state
 tmux/.tmux.conf	~/.config/tmux/.tmux.conf	user	oh-my-tmux 上游主文件，别直接改
-tmux/.tmux.conf.local	~/.config/tmux/.tmux.conf.local	user	本地自定义（前缀 Alt+n 等）
+tmux/.tmux.conf.local	~/.config/tmux/.tmux.conf.local	user	本地自定义（前缀 Ctrl+x，兼容 Ctrl+b）
 tmux/tmux.sh	~/.config/tmux/tmux.sh	user	旧的开机自启脚本（当前未启用）
 nvim/	~/.config/nvim/	user	lazy.nvim + 原生 LSP
 home/.zshrc	~/.zshrc	user	shell 入口：oh-my-zsh、p10k、代理、tmux attach
@@ -33,6 +42,8 @@ systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi �
 systemd/user/hermes-gateway.service	~/.config/systemd/user/hermes-gateway.service	user	Hermes gateway 单元（上游安装器写入，hermes update 会重写，漂了以实机为准）
 systemd/user/hermes-gateway.service.d/launch.conf	~/.config/systemd/user/hermes-gateway.service.d/launch.conf	user	gateway 用 /usr/bin/hermes wrapper 启动（覆盖单元里的 ExecStart）
 systemd/user/hermes-gateway.service.d/proxy.conf	~/.config/systemd/user/hermes-gateway.service.d/proxy.conf	user	gateway 转发走本机 7897 代理
+systemd/user/hermes-gateway.service.d/computer-use-wayland.conf	~/.config/systemd/user/hermes-gateway.service.d/computer-use-wayland.conf	user	Hermes computer-use 启用 Wayland
+systemd/user/hermes-gateway.service.d/override.conf	~/.config/systemd/user/hermes-gateway.service.d/override.conf	user	Hermes OOMPolicy=continue
 micmute-led/90-micmute-led.rules	/etc/udev/rules.d/90-micmute-led.rules	root	LED 文件权限
 system-files/etc/greetd/config.toml	/etc/greetd/config.toml	root	登录器（greetd + noctalia-greeter）
 system-files/etc/environment	/etc/environment	root	输入法环境变量

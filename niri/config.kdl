@@ -12,11 +12,6 @@ environment {
 
 spawn-at-startup "swaybg" "-i" "/home/srk/Pictures/wallhaven/wallhaven-gw2r2e.jpg" "-m" "fill"
 spawn-at-startup "noctalia"
-window-rule {
-    geometry-corner-radius 20
-    clip-to-geometry true
-}
-
 // v5 backdrop layer (blurred wallpaper) for niri overview.
 layer-rule {
   match namespace="^noctalia-backdrop"

@@ -24,9 +24,9 @@
 
 - 合成器 **niri 26.04**（滚动式列布局）；桌面 Shell **Noctalia v5**（`extra/noctalia`，二进制 `noctalia`）
 - 登录器 **greetd + noctalia-greeter**（`/etc/greetd/config.toml`），`sddm` 已 disabled
-- 显示：内屏 `eDP-1` 2240x1400@60.002 scale 1.35（`position x=2560`）；外接 `DP-1` HKC G27H2Max 2560x1440@200 scale 1（`position 0,0`）；热插拔切换交给 kanshi
+- 显示：内屏 `eDP-1` 2240x1400@60.002 scale 1.15（`position x=2560`）；外接 `DP-1` HKC G27H2Max 2560x1440@200 scale 1（`position 0,0`）；热插拔切换交给 kanshi
 - 终端 alacritty；shell zsh + oh-my-zsh（`/usr/share/oh-my-zsh`）+ powerlevel10k
-- 输入法 fcitx5，默认 `qingjian`；X11/Java 应用走 xwayland-satellite
+- 输入法 fcitx5，当前默认 `pinyin`，保留 `qingjian`；X11/Java 应用走 xwayland-satellite
 - 代理统一 `127.0.0.1:7897`（Clash Verge）；防火墙 firewalld（`nftables.service` 未启用）
 
 ## 键位速查
@@ -43,7 +43,7 @@ niri（`Super` 即 Mod）：
 | `Mod+[` / `Mod+]` | 上面两个动作的"智能版"：唯一窗口时并入相邻列，列里多窗口时把它拆出去 |
 | `Mod+R` / `Mod+Shift+R` | 切换列宽 / 窗高预设；`Mod+F` maximize 列 |
 | `Mod+V` 浮动、`Mod+W` 列内 tab 切换、`Mod+Q` 关窗 | |
-| `Mod+Shift+E` | 重载配置（`Ctrl+Alt+Delete` 退出 niri） |
+| `Mod+Shift+E` / `Ctrl+Alt+Delete` | 退出 niri 会话；配置修改由 niri 自动重载 |
 | `Mod+Shift+S` | 区域截图 → satty 标注，Enter 复制并存盘到 `~/Pictures/Screenshots` |
 | `Mod+Shift+O` | 区域截图 → tesseract OCR（中英）→ 剪贴板 |
 | `Print` / `Ctrl+Print` / `Alt+Print` | niri 内置：选区 / 整屏 / 窗口，直接进剪贴板 |
@@ -63,7 +63,7 @@ nvim：
 | LSP | `gd` 定义，`gr` 引用，`K` 悬停，`<leader>rn` 重命名，`<leader>ca` code action，`<leader>af` 格式化，`[g`/`]g` 诊断 |
 | Git | `gn`/`gp` 上下 hunk，`<leader>gb` blame，`<leader>gp` 预览，`<leader>gr` 重置 |
 
-补全 nvim-cmp + pyright；保存时 conform.nvim 调 black + isort；诊断只显示 ERROR。
+补全 nvim-cmp + pyright；保存时 conform.nvim 调 black + isort；诊断只显示 ERROR。Markdown / rst / diff 不做全局行尾空白清理，保留有语义的空格。
 
 ## 装机
 
@@ -91,6 +91,8 @@ git clone https://github.com/Mel-SRK/My_config && cd My_config
 ./tools/check-sync.sh          # 全量
 ./tools/check-sync.sh niri     # 只看匹配项
 ```
+
+安装默认保留 MANIFEST 中标记为 `state` 的已有文件（Noctalia settings、fcitx5 profile），缺失时才初始化。只有明确恢复留档状态时才用 `./install.sh --apply --restore-state`；该选项会覆盖现有状态。
 
 `environment.d/` 里的变量要重新登录才对 niri 启动的应用生效。
 
@@ -127,10 +129,11 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 
 | profile | 触发 | 结果 |
 |---|---|---|
-| `docked` | 插上 DP-1 | `eDP-1` 关闭，`DP-1` 2560x1440@200 scale 1 |
-| `mobile` | 拔掉 DP-1 | `eDP-1` 2240x1400@60.002 scale 1.35 |
+| `docked-dp1` | 插上 DP-1 | `eDP-1` 关闭，`DP-1` 2560x1440@200 scale 1 |
+| `docked-dp2` | 插上 DP-2 | 双屏：DP-2 在左 200Hz，eDP-1 在右 scale 1.15 |
+| `mobile` | 拔掉全部外接屏 | `eDP-1` 2240x1400@60.002 scale 1.15 |
 
-`mobile` 里必须显式写 `enable`，否则 kanshi 匹配到了却无法重新启用被关过的 `eDP-1`。kanshi 判断的是物理连接状态：DP 线插着就保持 docked，拔线才回 mobile。
+`mobile` 里必须显式写 `enable`，否则 kanshi 匹配到了却无法重新启用被关过的 `eDP-1`。kanshi 判断的是物理连接状态：DP-1 接线保持 docked-dp1，DP-2 接线保持 docked-dp2，外接全部拔掉才回 mobile。
 
 刷新率在 niri `output` 块和 kanshi profile 里各写一份，两处必须一致；不一致会看到启动后被反复切换。
 
@@ -149,7 +152,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 
 ## 输入法
 
-fcitx5。`fcitx5/profile` 里默认输入法是 `qingjian`，切换键 `Ctrl+Shift`，另绑 `Alt+Shift`。
+fcitx5。`fcitx5/profile` 的留档默认输入法是 `pinyin`，该文件按运行状态管理，普通安装保留实机已有选择；不再收录 `conf/cached_layouts` 缓存。切换键 `Ctrl+Shift`，另绑 `Alt+Shift`。
 环境变量在 `/etc/environment`：`QT_IM_MODULE` / `SDL_IM_MODULE` / `GLFW_IM_MODULE` / `XMODIFIERS`；`GTK_IM_MODULE` 是注释掉的——GTK 应用走原生 text-input，不需要它。
 
 ## GTK / Electron 暗色
@@ -164,7 +167,7 @@ fcitx5。`fcitx5/profile` 里默认输入法是 `qingjian`，切换键 `Ctrl+Shi
 
 - `/etc/greetd/config.toml` — greeter 命令与会话用户（`vt=1`、`noctalia-greeter-session`）
 - `/etc/environment` — 输入法环境变量
-- `/etc/pacman.conf` — multilib、blackarch（清华镜像 + `SigLevel Optional TrustAll`）、archlinuxcn
+- `/etc/pacman.conf` — multilib、blackarch（清华镜像 + `Required DatabaseOptional TrustedOnly`）、archlinuxcn、arch4edu（后两者继承全局签名策略）
 - `/etc/pam.d/greetd` — 末尾追加的 `pam_gnupg` 段（登录时把密码预置给 session 阶段，供 gpg-agent 自动解锁）
 - `/etc/systemd/system/clash-verge-service.service`、`/etc/systemd/system/kvm-nat-bypass-routes.service` + `/usr/local/sbin/kvm-nat-bypass-routes.sh`（后者用 `ip rule` 8800/8900 让 `192.168.122.0/24` 的 VM 流量绕开 mihomo TUN）
 - `/etc/udev/rules.d/50-nuphy.rules`、`50-vgn-mouse.rules`、`90-micmute-led.rules`
@@ -217,4 +220,4 @@ zsh 补全在 `local/completions/_ctfrun`（两个脚本共用，靠 `#compdef c
 
 ## Hermes gateway
 
-`systemd/user/hermes-gateway.service` + `.d/proxy.conf`：从 `/opt/hermes-agent/venv` 起 gateway，转发走本机 7897 代理。
+`systemd/user/hermes-gateway.service` 与 `.d/` 的四个 drop-in 均由 MANIFEST 管理：launch.conf 使用 `/usr/bin/hermes` wrapper，proxy.conf 配置 7897 代理，computer-use-wayland.conf 启用 Wayland，override.conf 保留 `OOMPolicy=continue`。

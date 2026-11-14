@@ -32,3 +32,6 @@ hermes/config.yaml
 
 # 备份残留
 **/*.bak
+
+# fcitx5 自动生成的键盘布局缓存
+/fcitx5/conf/cached_layouts

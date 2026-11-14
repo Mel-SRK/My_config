@@ -6,11 +6,14 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
 MANIFEST="$REPO/MANIFEST.tsv"
 APPLY=0
-case "$#:${1:-}" in
-  0:) ;;
-  1:--apply) APPLY=1 ;;
-  *) echo '用法：install.sh [--apply]' >&2; exit 2 ;;
-esac
+RESTORE_STATE=0
+for arg in "$@"; do
+  case "$arg" in
+    --apply) [[ "$APPLY" -eq 0 ]] || exit 2; APPLY=1 ;;
+    --restore-state) [[ "$RESTORE_STATE" -eq 0 ]] || exit 2; RESTORE_STATE=1 ;;
+    *) echo '用法：install.sh [--apply] [--restore-state]' >&2; exit 2 ;;
+  esac
+done
 
 [ -f "$MANIFEST" ] || { echo "找不到 $MANIFEST"; exit 1; }
 
@@ -26,13 +29,20 @@ while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
     exit 1
   }
   dst_exp="${dst/#\~/$HOME}"
+  # 状态快照只初始化缺失文件；明确恢复时才覆盖已有 GUI / 输入法选择。
+  if [[ "${extra:-}" == state && "$RESTORE_STATE" -eq 0 && ( -e "$dst_exp" || -L "$dst_exp" ) ]]; then
+    echo "保留  $src  ->  $dst_exp（已有运行状态）"
+    continue
+  fi
   if [ "$mode" = "root" ]; then
     count_root=$((count_root+1))
     if [ -d "$REPO/$src" ]; then
       printf -v command_line 'sudo cp -a -- %q %q' "$REPO/$src/." "$dst/"
       root_cmds+=("$command_line")
     else
-      printf -v command_line 'sudo install -Dm644 -- %q %q' "$REPO/$src" "$dst"
+      install_mode=644
+      [[ ! -x "$REPO/$src" ]] || install_mode=755
+      printf -v command_line 'sudo install -Dm%s -- %q %q' "$install_mode" "$REPO/$src" "$dst"
       root_cmds+=("$command_line")
       # /etc/greetd 或 /etc/pam.d/greetd 这次要动的话，下面得配一句警告
       case "$dst" in
