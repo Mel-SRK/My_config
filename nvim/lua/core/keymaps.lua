@@ -7,6 +7,17 @@ map("n", "<C-j>", "<C-w>j", opts)
 map("n", "<C-k>", "<C-w>k", opts)
 map("n", "<C-l>", "<C-w>l", opts)
 
+-- Window commands without Ctrl-W (Orca 把 <C-w> 当成"关闭标签页", 传不到 nvim)
+local function wincmd(keys)
+  return function() vim.cmd.wincmd(keys) end
+end
+map("n", "<leader>ww", wincmd("w"), opts) -- 循环切换窗口
+map("n", "<leader>ws", wincmd("s"), opts) -- 横向分屏
+map("n", "<leader>wv", wincmd("v"), opts) -- 纵向分屏
+map("n", "<leader>wc", wincmd("c"), opts) -- 关闭当前窗口
+map("n", "<leader>wo", wincmd("o"), opts) -- 只保留当前窗口
+map("n", "<leader>w=", wincmd("="), opts) -- 等宽等高
+
 -- Window resize
 map("n", "<C-Up>", ":resize -2<CR>", opts)
 map("n", "<C-Down>", ":resize +2<CR>", opts)
@@ -36,8 +47,9 @@ map("n", "q", ":q<CR>", opts)
 map("n", "<C-_>", "gcc", { remap = true, silent = true })
 map("v", "<C-_>", "gc", { remap = true, silent = true })
 
--- Nvim-tree: t 切换打开/关闭
+-- Nvim-tree: t 切换打开/关闭；<Space>e 只聚焦/打开树，不关闭（不经过 Ctrl-W）
 map("n", "t", ":NvimTreeToggle<CR>", opts)
+map("n", "<leader>e", ":NvimTreeFocus<CR>", opts)
 
 -- fzf-lua
 map("n", "<leader>ff", ":FzfLua files<CR>", opts)

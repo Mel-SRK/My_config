@@ -56,12 +56,17 @@ tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 
 
 nvim：
 
+`<leader>` 是空格。以下快捷键在普通模式使用：编辑后先按 `Esc`，再依次按空格和后续键（默认两键间隔不超过一秒，无需按住空格）。
+
 | 类别 | 键 |
 |---|---|
-| 基础 | `t` 目录树，`1`-`9` 切 buffer，`gt`/`gT` 下一个/上一个，`w`/`q` 保存/退出，`<C-_>` 注释，`<Esc>` 清搜索高亮 |
+| 基础 | `t` 开关目录树，`<leader>e` 打开或聚焦目录树，`1`-`9` 切 buffer，`gt`/`gT` 下一个/上一个，`w`/`q` 保存/退出，`<C-_>` 注释，`<Esc>` 清搜索高亮 |
+| 窗口 | `<C-h/j/k/l>` 移到左/下/上/右窗口；`<leader>ww` 循环切换，`<leader>ws`/`<leader>wv` 横分/竖分，`<leader>wc` 关闭，`<leader>wo` 只留当前窗口，`<leader>w=` 等宽等高 |
 | 模糊搜索 | `<leader>ff` 文件名，`<leader>fs` 全局搜内容，`<leader>fb` buffer，`<leader>fh` 最近文件，`<leader>fg` git 改动 |
 | LSP | `gd` 定义，`gr` 引用，`K` 悬停，`<leader>rn` 重命名，`<leader>ca` code action，`<leader>af` 格式化，`[g`/`]g` 诊断 |
 | Git | `gn`/`gp` 上下 hunk，`<leader>gb` blame，`<leader>gp` 预览，`<leader>gr` 重置 |
+
+Orca 内的 `Ctrl+W` 会关闭应用标签页，窗口操作使用上面的 `<leader>w…`；例如 `Esc` → 空格 → `e` 可从文件回目录树，树已关闭时也会打开。
 
 补全 nvim-cmp + pyright；保存时 conform.nvim 调 black + isort；诊断只显示 ERROR。Markdown / rst / diff 不做全局行尾空白清理，保留有语义的空格。
 
