@@ -46,11 +46,14 @@ niri（`Super` 即 Mod）：
 | `Mod+Shift+E` / `Ctrl+Alt+Delete` | 退出 niri 会话；配置修改由 niri 自动重载 |
 | `Mod+Shift+S` | 区域截图 → satty 标注，Enter 复制并存盘到 `~/Pictures/Screenshots` |
 | `Mod+Shift+O` | 区域截图 → tesseract OCR（中英）→ 剪贴板 |
+| `Mod+A` / `Mod+S` / `Mod+Shift+A` | Manggo 选词翻译 / 截图翻译 / 输入翻译（自动启动，无需在应用内注册热键） |
 | `Print` / `Ctrl+Print` / `Alt+Print` | niri 内置：选区 / 整屏 / 窗口，直接进剪贴板 |
 
 媒体键 `Ctrl+Alt+Left/Right` 或 `XF86AudioPrev/Next`，亮度走 `noctalia msg brightness-up/down`（不再用 brightnessctl）。
 
 截图分两套：`Print` 系走 niri 内置，快，适合立刻要图；`Mod+Shift+S` 和 `Mod+Shift+O` 的选区也走 niri 截图 UI（选区期间冻结画面，grim + slurp 是实时画面，不冻结），选完再由 satty 标注或 tesseract 识别。`Mod+Shift+S` 存盘到 `~/Pictures/Screenshots`，只保留最近 200 张（`SCREENSHOT_KEEP` 可改，0 = 不清理），niri 自带 `Print` 存的图也计入。脚本在 `local/bin/screenshot-annotate`、`local/bin/ocr-region`。
+
+Manggo 的安装、快捷键、自启和截图故障处理见 [Manggo 使用说明](docs/manggo.md)。快捷键由 niri 注册，截图使用 wlr Portal，屏幕共享保留 GNOME 后端。
 
 tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 `Ctrl+b`）。新建窗口 `Ctrl+x` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
 

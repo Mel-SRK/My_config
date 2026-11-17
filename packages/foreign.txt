@@ -12,6 +12,7 @@ hermes-agent-desktop-bin
 librepods
 linuxqq
 linuxqq-wayland-fix
+manggo
 motrix-bin
 neofetch
 ocs-desktop-bin
