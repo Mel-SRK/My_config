@@ -161,6 +161,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 ## 输入法
 
 fcitx5。`fcitx5/profile` 的留档默认输入法是 `pinyin`，该文件按运行状态管理，普通安装保留实机已有选择；不再收录 `conf/cached_layouts` 缓存。切换键 `Ctrl+Shift`，另绑 `Alt+Shift`。
+云拼音已开启，配置为 `fcitx5/conf/pinyin.conf` 中的 `CloudPinyinEnabled=True`；拼音、繁简转换和标点配置按实机留档。
 环境变量在 `/etc/environment`：`QT_IM_MODULE` / `SDL_IM_MODULE` / `GLFW_IM_MODULE` / `XMODIFIERS`；`GTK_IM_MODULE` 是注释掉的——GTK 应用走原生 text-input，不需要它。
 
 ## GTK / Electron 暗色

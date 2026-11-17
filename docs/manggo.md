@@ -14,6 +14,16 @@ yay -S manggo
 
 翻译服务、OCR 服务和语言偏好在 Manggo 内设置。日常使用简体中文为默认目标语言、英语为备用目标语言。完整的 `~/.config/Manggo/Manggo.conf` 包含应用及服务配置，由应用管理，不整体覆盖或收录到仓库。
 
+## 退役 Crow Translate
+
+翻译入口已统一为 Manggo，仓库的快捷键、包清单和自启配置均不再引用 Crow Translate。本机原有的 `~/.config/crow-translate` 已移出配置目录。软件包由用户手动卸载：
+
+```sh
+sudo pacman -Rns crow-translate
+```
+
+该命令由 pacman 一并处理不再需要的依赖。Manggo 和截图所需的 Portal 配置继续保留。
+
 ## 快捷键
 
 `Super` 是 Win 键，niri 配置中写作 `Mod`。
