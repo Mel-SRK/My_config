@@ -8,6 +8,10 @@
 #   ctfdbg                        # 不给参数直接进 gdb，进去后 file ./chall
 #   ctfdbg -n ./chall             # 放开网络
 #
+# 同一用户、同一实际目录、同一网络模式自动复用沙箱。
+# 两个终端均 cd 到题目目录，再 ctfrun python exp.py / ctfdbg -q -p <PID>。
+# 使用 -n 时两边都要加；最后一个进程退出后沙箱自动结束。
+#
 # 选项（必须放在最前面）:
 #   -n, --net     共享宿主网络栈 = 样本可联网（默认断网）
 #   --no-net      完全断网（默认）
@@ -19,7 +23,7 @@
 set -euo pipefail
 
 usage() {
-  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 net_isolate=1
@@ -42,6 +46,10 @@ case "$sandbox_pwd" in
   /tmp|/var/tmp|/dev/shm)
     echo "⚠ 当前目录是世界可写的共享目录, 任何人都能往里放文件。" >&2 ;;
 esac
+
+# 按实际目录生成稳定名称，网络模式分开，避免默认断网时误入联网沙箱。
+sandbox_key="$(printf '%s' "$sandbox_pwd" | sha256sum)"
+sandbox_name="ctf-${UID}-${net_isolate}-${sandbox_key:0:24}"
 
 jail_opts=(
   --whitelist="$sandbox_pwd"
@@ -75,7 +83,8 @@ export DEBUGINFOD_URLS=
 #      出来的子进程当组长，它一退出这个组就空了，症状原样回来。
 trap '' TTOU
 
-exec firejail "${jail_opts[@]}" python3 -c '
+# join-or-start 必须紧挨命令：加入时它后面的参数会被当作待执行程序。
+exec firejail "${jail_opts[@]}" --join-or-start="$sandbox_name" python3 -c '
 import os, sys
 
 args = sys.argv[1:]
