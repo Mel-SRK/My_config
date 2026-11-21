@@ -5,7 +5,6 @@ clash-verge-rev-bin
 deepseek-harness-desktop
 drawio-desktop-git
 drm_info-git
-fcitx5-qingjian-git
 fuck
 hermes-agent
 hermes-agent-desktop-bin
