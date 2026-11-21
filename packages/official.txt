@@ -87,7 +87,7 @@ networkmanager
 niri
 nmap
 noctalia
-noctalia-greeter-git
+noctalia-greeter
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji

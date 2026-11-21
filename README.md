@@ -77,10 +77,10 @@ Orca 内的 `Ctrl+W` 会关闭应用标签页，窗口操作使用上面的 `<le
 
 ```shell
 # 1. 装包
-sudo pacman -S niri noctalia kanshi greetd xwayland-satellite alacritty tmux neovim \
+sudo pacman -S niri noctalia kanshi greetd extra/noctalia-greeter xwayland-satellite alacritty tmux neovim \
                zsh fcitx5 fcitx5-chinese-addons fcitx5-qt fcitx5-gtk \
                swaybg firejail pwndbg qt6ct
-# 非官方仓库：oh-my-zsh-git（提供 /usr/share/oh-my-zsh）、noctalia-greeter-git、fuck（= thefuck）
+# 非官方仓库：oh-my-zsh-git（提供 /usr/share/oh-my-zsh）、fuck（= thefuck）
 # powerlevel10k / zsh-autosuggestions / zsh-syntax-highlighting 放在 ~/.oh-my-zsh/custom/（git clone）
 
 # 2. 取仓库并安装
