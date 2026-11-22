@@ -23,7 +23,7 @@ profile docked-dp2 {
         enable
         mode 2240x1400@60.002
         position 2560,0
-        scale 1.15
+        scale 1.166667
     }
 }
 
@@ -33,6 +33,6 @@ profile mobile {
         enable
         mode 2240x1400@60.002
         position 0,0
-        scale 1.15
+        scale 1.166667
     }
 }

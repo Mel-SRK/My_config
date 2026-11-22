@@ -61,7 +61,7 @@ input {
 // Output configuration — 2K 改装屏 (2240x1400)
 output "eDP-1" {
     mode "2240x1400@60.002"
-    scale 1.15
+    scale 1.166667
     transform "normal"
     variable-refresh-rate
     position x=2560 y=0

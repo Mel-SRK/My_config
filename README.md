@@ -24,7 +24,7 @@
 
 - 合成器 **niri 26.04**（滚动式列布局）；桌面 Shell **Noctalia v5**（`extra/noctalia`，二进制 `noctalia`）
 - 登录器 **greetd + noctalia-greeter**（`/etc/greetd/config.toml`），`sddm` 已 disabled
-- 显示：内屏 `eDP-1` 2240x1400@60.002 scale 1.15（`position x=2560`）；外接 `DP-1` HKC G27H2Max 2560x1440@200 scale 1（`position 0,0`）；热插拔切换交给 kanshi
+- 显示：内屏 `eDP-1` 2240x1400@60.002 scale 1.166667（`position x=2560`）；外接 `DP-1` HKC G27H2Max 2560x1440@200 scale 1（`position 0,0`）；热插拔切换交给 kanshi
 - 终端 alacritty；shell zsh + oh-my-zsh（`/usr/share/oh-my-zsh`）+ powerlevel10k
 - 输入法 fcitx5，当前默认 `pinyin`；X11/Java 应用走 xwayland-satellite
 - 代理统一 `127.0.0.1:7897`（Clash Verge）；防火墙 firewalld（`nftables.service` 未启用）
@@ -138,8 +138,8 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 | profile | 触发 | 结果 |
 |---|---|---|
 | `docked-dp1` | 插上 DP-1 | `eDP-1` 关闭，`DP-1` 2560x1440@200 scale 1 |
-| `docked-dp2` | 插上 DP-2 | 双屏：DP-2 在左 200Hz，eDP-1 在右 scale 1.15 |
-| `mobile` | 拔掉全部外接屏 | `eDP-1` 2240x1400@60.002 scale 1.15 |
+| `docked-dp2` | 插上 DP-2 | 双屏：DP-2 在左 200Hz，eDP-1 在右 scale 1.166667 |
+| `mobile` | 拔掉全部外接屏 | `eDP-1` 2240x1400@60.002 scale 1.166667 |
 
 `mobile` 里必须显式写 `enable`，否则 kanshi 匹配到了却无法重新启用被关过的 `eDP-1`。kanshi 判断的是物理连接状态：DP-1 接线保持 docked-dp1，DP-2 接线保持 docked-dp2，外接全部拔掉才回 mobile。
 
