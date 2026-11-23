@@ -88,12 +88,23 @@ if (( __have_tty )); then
     # User aliases
     alias vim="nvim"
     alias vi="nvim"
-    alias ls="ls --color=auto"
-    alias ll="ls -la"
-    alias la="ls -A"
+
+    if command -v eza >/dev/null 2>&1; then
+        # Omarchy 的长列表：表头、目录优先、Nerd Font 图标。
+        alias ls='eza -lh --group-directories-first --icons=auto'
+        alias ll='ls -aa'
+        alias la='ls -a'
+    else
+        alias ls='ls --color=auto'
+        alias ll='ls -la'
+        alias la='ls -A'
+    fi
 
     # fzf：Ctrl+R 历史、Ctrl+T 文件、Alt+C 跳目录、**<Tab> 补全
     if command -v fzf >/dev/null 2>&1; then
+        if [[ -z ${FZF_CTRL_T_OPTS:-} ]] && command -v bat >/dev/null 2>&1; then
+            export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then ls -1A --color=always -- {}; else bat --color=always --paging=never --style=numbers --line-range=:200 -- {}; fi'"
+        fi
         source <(fzf --zsh)
     fi
 

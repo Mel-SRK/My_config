@@ -30,6 +30,7 @@ dosfstools
 edk2-ovmf
 efibootmgr
 espeak-ng
+eza
 fcitx5
 fcitx5-chinese-addons
 fcitx5-configtool
@@ -42,12 +43,14 @@ firefox
 firefox-i18n-zh-cn
 firejail
 firewalld
+foot
 fprintd
 fuzzel
 fwupd
 fzf
 ghidra
 gimp
+git-delta
 github-cli
 go
 gpu-screen-recorder

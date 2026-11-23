@@ -1,3 +1,14 @@
+[core]
+	pager = "if command -v delta >/dev/null 2>&1; then \
+	    exec delta --side-by-side=120; \
+	elif [ -x \"$HOME/.local/bin/delta\" ]; then \
+	    exec \"$HOME/.local/bin/delta\" --side-by-side=120; \
+	else \
+	    exec cat; \
+	fi"
+[delta]
+	navigate = true
+	line-numbers = true
 [credential "https://github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential

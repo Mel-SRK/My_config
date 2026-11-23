@@ -4,6 +4,8 @@ niri/noctalia.kdl	~/.config/niri/noctalia.kdl	user	niri 焦点框/边框配色
 xdg-desktop-portal/niri-portals.conf	~/.config/xdg-desktop-portal/niri-portals.conf	user	niri Portal：截图 wlr、录屏 GNOME、访问授权 GTK
 autostart/Manggo.desktop	~/.config/autostart/Manggo.desktop	user	Manggo 登录自启（应用管理，保留已有设置）	state
 alacritty/	~/.config/alacritty/	user	终端 + noctalia 主题
+foot/foot.ini	~/.config/foot/foot.ini	user	默认终端：字体、透明度、模糊
+foot/themes/noctalia	~/.config/foot/themes/noctalia	user	Noctalia 生成的 Foot 配色，缺失时初始化	state
 fontconfig/fonts.conf	~/.config/fontconfig/fonts.conf	user	字体渲染
 gtk-3.0/settings.ini	~/.config/gtk-3.0/settings.ini	user	GTK3 暗色
 gtk-4.0/settings.ini	~/.config/gtk-4.0/settings.ini	user	GTK4 暗色

@@ -25,7 +25,7 @@
 - 合成器 **niri 26.04**（滚动式列布局）；桌面 Shell **Noctalia v5**（`extra/noctalia`，二进制 `noctalia`）
 - 登录器 **greetd + noctalia-greeter**（`/etc/greetd/config.toml`），`sddm` 已 disabled
 - 显示：内屏 `eDP-1` 2240x1400@60.002 scale 1.166667（`position x=2560`）；外接 `DP-1` HKC G27H2Max 2560x1440@200 scale 1（`position 0,0`）；热插拔切换交给 kanshi
-- 终端 alacritty；shell zsh + oh-my-zsh（`/usr/share/oh-my-zsh`）+ powerlevel10k
+- 默认终端 Foot，使用 Alacritty 同款 CaskaydiaCove Nerd Font Mono 11 pt、Noctalia 配色、85% 背景不透明度和模糊；shell zsh + oh-my-zsh（`/usr/share/oh-my-zsh`）+ powerlevel10k
 - 输入法 fcitx5，当前默认 `pinyin`；X11/Java 应用走 xwayland-satellite
 - 代理统一 `127.0.0.1:7897`（Clash Verge）；防火墙 firewalld（`nftables.service` 未启用）
 
@@ -35,7 +35,8 @@ niri（`Super` 即 Mod）：
 
 | 键 | 作用 |
 |---|---|
-| `Mod+T` | 终端 |
+| `Mod+E` | 打开 Nautilus 文件管理器 |
+| `Mod+T` | 打开 Foot |
 | `Mod+D` / `Mod+B` | Noctalia 启动器 / 剪贴板面板 |
 | `Super+Alt+L` | 锁屏；`Mod+O` overview |
 | `Mod+H/J/K/L` | 焦点：左/下/上/右（加 `Ctrl` 变成移动） |
@@ -73,13 +74,21 @@ Orca 内的 `Ctrl+W` 会关闭应用标签页，窗口操作使用上面的 `<le
 
 补全 nvim-cmp + pyright；保存时 conform.nvim 调 black + isort；诊断只显示 ERROR。Markdown / rst / diff 不做全局行尾空白清理，保留有语义的空格。
 
+## 终端与文件浏览
+
+- `Super+T` 打开 Foot。字体、透明度和模糊设置在 [`foot/foot.ini`](foot/foot.ini)，导入的 Noctalia 配色独立管理。安装时只在缺失的情况下初始化配色文件，之后由 Noctalia 更新。
+- 交互式 Zsh 有 `eza` 时，`ls` 显示表头、颜色和 Nerd Font 图标，目录优先。`la` 含隐藏项，`ll` 还显示 `.` 和 `..`。`command ls` 可以直接使用 GNU `ls`。
+- `Ctrl+T` 用 `fzf` 搜文件和目录。文件右侧预览前 200 行，使用 `bat` 高亮，目录则显示内容列表。已打开的 tmux 窗格用 `source ~/.zshrc` 加载更新。
+- `git diff` 在交互终端用 Delta 显示行号，终端宽度达到 120 列时左右对照。Git 会查找 `PATH` 和 `~/.local/bin/delta`，找不到时输出原始差异。
+- `Super+E` 打开 Nautilus，用侧栏查看、挂载和弹出可移动设备，也支持鼠标拖拽。需要在终端浏览时可以运行 `yazi`，`s` 搜文件名，`Shift+S` 搜文件内容。
+
 ## 装机
 
 ```shell
 # 1. 装包
-sudo pacman -S niri noctalia kanshi greetd extra/noctalia-greeter xwayland-satellite alacritty tmux neovim \
+sudo pacman -S niri noctalia kanshi greetd extra/noctalia-greeter xwayland-satellite foot nautilus tmux neovim \
                zsh fcitx5 fcitx5-chinese-addons fcitx5-qt fcitx5-gtk \
-               swaybg firejail pwndbg qt6ct
+               swaybg firejail pwndbg qt6ct ttf-cascadia-code-nerd eza fzf bat git-delta
 # 非官方仓库：oh-my-zsh-git（提供 /usr/share/oh-my-zsh）、fuck（= thefuck）
 # powerlevel10k / zsh-autosuggestions / zsh-syntax-highlighting 放在 ~/.oh-my-zsh/custom/（git clone）
 
@@ -132,6 +141,8 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 ```
 
 换机器或重装后先运行 `tool/mycfg-pkgs install` 并手动执行它打印的装包命令，再运行 `./install.sh`。`install.sh` 结尾会自动提示缺包数量。
+
+这台机器的 `eza` 和 `delta` 目前位于 `~/.local/bin`，来自校验过的 Arch 官方包。`mycfg-pkgs check` 通过 pacman 查询软件包，因此这两个用户级安装仍显示为缺包。重装时可按清单安装官方软件包，由 pacman 管理更新。
 
 ## 外接显示器（kanshi）
 
