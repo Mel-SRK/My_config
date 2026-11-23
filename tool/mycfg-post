@@ -40,6 +40,18 @@ for name in .tmux.conf .tmux.conf.local; do
     if [[ "$apply" -eq 1 ]]; then ln -sfnT -- "$target" "$link"; fi
   fi
 done
+
+recent_files_key=(org.gnome.desktop.privacy remember-recent-files)
+if recent_files_value=$(gsettings get "${recent_files_key[@]}" 2>/dev/null) && [[ "$recent_files_value" != false ]]; then
+  printf 'gsettings set %s %s false\n' "${recent_files_key[@]}"
+  steps=$((steps+1))
+  if [[ "$apply" -eq 1 ]]; then
+    if ! gsettings set "${recent_files_key[@]}" false || [[ "$(gsettings get "${recent_files_key[@]}")" != false ]]; then
+      echo '未能关闭最近文件记录，请在用户图形会话中重试。' >&2
+      exit 1
+    fi
+  fi
+fi
 if [[ "$steps" -eq 0 ]]; then echo '无后续步骤'; fi
 echo 'niri msg action load-config-file'
 echo '重新登录后 environment.d/ 才生效'

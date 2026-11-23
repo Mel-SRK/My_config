@@ -99,7 +99,7 @@ git clone https://github.com/Mel-SRK/My_config && cd My_config
 
 # 3. 收尾
 ./tool/mycfg-post           # 从 MANIFEST 打印后续步骤
-./tool/mycfg-post --apply   # 执行 chmod 与 tmux 链接；systemctl 命令仍需自己跑
+./tool/mycfg-post --apply   # 在用户图形会话中执行，修复权限与 tmux 链接，并在支持时关闭 GTK 最近文件记录。systemctl 命令仍需自己跑
 ```
 
 `install.sh` 不会碰 `archive/`。装完想确认有没有漏同步：
