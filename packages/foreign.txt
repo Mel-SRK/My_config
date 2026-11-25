@@ -7,7 +7,6 @@ drawio-desktop-git
 drm_info-git
 fuck
 hermes-agent
-hermes-agent-desktop-bin
 librepods
 linuxqq
 linuxqq-wayland-fix

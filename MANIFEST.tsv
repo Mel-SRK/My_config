@@ -2,7 +2,7 @@
 niri/config.kdl	~/.config/niri/config.kdl	user	niri 主配置：输出、键位、启动项
 niri/noctalia.kdl	~/.config/niri/noctalia.kdl	user	niri 焦点框/边框配色
 xdg-desktop-portal/niri-portals.conf	~/.config/xdg-desktop-portal/niri-portals.conf	user	niri Portal：截图 wlr、录屏 GNOME、访问授权 GTK
-autostart/Manggo.desktop	~/.config/autostart/Manggo.desktop	user	Manggo 登录自启（应用管理，保留已有设置）	state
+autostart/com.pylogmon.Manggo.desktop	~/.config/autostart/com.pylogmon.Manggo.desktop	user	Manggo 登录自启（应用管理，保留已有设置）	state
 alacritty/	~/.config/alacritty/	user	终端 + noctalia 主题
 foot/foot.ini	~/.config/foot/foot.ini	user	默认终端：字体、透明度、模糊
 foot/themes/noctalia	~/.config/foot/themes/noctalia	user	Noctalia 生成的 Foot 配色，缺失时初始化	state
@@ -40,6 +40,7 @@ local/bin/hmcl-bin	~/.local/bin/hmcl-bin	user	HMCL 的 java/xwayland 包装
 local/bin/mailsend	~/.local/bin/mailsend	user	命令行发信：复用 Thunderbird 凭据（password / Gmail XOAUTH2），不落明文密码
 local/bin/screenshot-annotate	~/.local/bin/screenshot-annotate	user	区域截图 + satty 标注，Enter 复制并存盘
 local/bin/ocr-region	~/.local/bin/ocr-region	user	区域截图 OCR（chi_sim+eng）到剪贴板
+local/bin/manggo-screenshot-translate	~/.local/bin/manggo-screenshot-translate	user	冻结画面，选区 OCR 后交给 Manggo 翻译
 micmute-led/micmute-led-sync.sh	~/.local/bin/micmute-led-sync.sh	user	麦克风静音 LED 同步脚本
 micmute-led/micmute-led-sync.service	~/.config/systemd/user/micmute-led-sync.service	user	对应 user 服务
 systemd/user/kanshi.service	~/.config/systemd/user/kanshi.service	user	kanshi 随图形会话启动

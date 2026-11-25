@@ -61,7 +61,7 @@ while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
       cp -a "$REPO/$src/." "$dst_exp/"
       echo "copy  $src  ->  $dst_exp/"
     else
-      cp -a "$REPO/$src" "$dst_exp"
+      cp -aT -- "$REPO/$src" "$dst_exp"
       echo "copy  $src  ->  $dst_exp"
     fi
   else

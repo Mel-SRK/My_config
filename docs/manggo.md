@@ -1,18 +1,22 @@
 # Manggo：niri 下的中英翻译
 
-当前使用 AUR `manggo`，程序名是大小写敏感的 `Manggo`。2026-11-17 核验版本为 1.2.2-2。
+本机使用本地打包的 Manggo 1.3.9，命令为小写的 `manggo`。截至 2026-11-25，AUR 的 `manggo` 仍是 1.2.2。仓库提供的 `PKGBUILD` 会下载官方 Linux x86_64 发布包并校验 SHA-256。 [Manggo 更新清单](https://manggo.pylogmon.cn/assets/update-linux-amd64.json) · [AUR 版本](https://aur.archlinux.org/rpc/v5/info/manggo)
 
 ## 安装与恢复
 
 ```sh
-sudo pacman -S --needed xdg-desktop-portal xdg-desktop-portal-gtk \
-    xdg-desktop-portal-gnome xdg-desktop-portal-wlr
-yay -S manggo
+sudo pacman -S --needed base-devel xdg-desktop-portal xdg-desktop-portal-gtk \
+    xdg-desktop-portal-gnome xdg-desktop-portal-wlr wl-clipboard libnotify \
+    tesseract tesseract-data-chi_sim tesseract-data-eng
+(cd packages/manggo && makepkg -si)
+manggo --version
 ```
 
-随后按仓库根目录的装机流程运行 `./install.sh --apply`。MANIFEST 包含 niri 快捷键、Portal 路由和 Manggo 自启文件。
+如果已有 `manggo-1.3.9-0.1-x86_64.pkg.tar.zst`，也可用 `sudo pacman -U` 安装这份包。
 
-翻译服务、OCR 服务和语言偏好在 Manggo 内设置。日常使用简体中文为默认目标语言、英语为备用目标语言。完整的 `~/.config/Manggo/Manggo.conf` 包含应用及服务配置，由应用管理，不整体覆盖或收录到仓库。
+随后按仓库根目录的装机流程运行 `./install.sh --apply`。MANIFEST 包含 niri 快捷键、截图翻译脚本、Portal 路由和 Manggo 自启文件。
+
+在 Manggo 内设置翻译服务和目标语言。本机使用简体中文为默认目标语言、英语为备用目标语言。应用设置和服务凭据由 Manggo 管理，恢复时在应用内配置。
 
 ## 退役 Crow Translate
 
@@ -28,31 +32,33 @@ sudo pacman -Rns crow-translate
 
 `Super` 是 Win 键，niri 配置中写作 `Mod`。
 
-| 按键 | 操作 | Manggo 动作 |
+| 按键 | 操作 | 处理方式 |
 |---|---|---|
-| `Super+A` | 选中文字后翻译 | `selection-translation` |
-| `Super+S` | 框选屏幕区域后翻译 | `screenshot-translation` |
+| `Super+A` | 选中文字后翻译 | 优先读取 Wayland 主选区，必要时交给 `selection-translation` |
+| `Super+S` | 框选屏幕区域后翻译 | 冻结画面，使用本地 Tesseract 识别中英文字，再交给 Manggo |
 | `Super+Shift+A` | 打开输入翻译窗口，输入或粘贴文字 | `input-translation` |
 
-这些键由 niri 注册，通过 `Manggo --action <动作>` 调用；Manggo 未运行时会自动启动，已运行时转发给现有实例。应用内无需重复注册这些快捷键。`Manggo --list-actions` 可查看安装版本实际支持的动作。
+这些键由 niri 注册，通过 `manggo --action <动作>` 调用。Manggo 未运行时会自动启动，已运行时转发给现有实例。应用内无需重复注册热键。
 
-原有的 `Super+Shift+O` 继续通过 niri 截图和本地 Tesseract 识别中英文字，结果复制到剪贴板；`Super+Shift+S` 继续用于截图标注。
+截图翻译会优先使用 `~/.local/bin/still` 或 `PATH` 里的 `still`，并要求同时安装 `grim` 和 `slurp`。缺少这些工具时，脚本会使用 niri 自带的冻结选区。niri 会把截图放入剪贴板，按 Esc 后脚本最多等待 60 秒。两条路径都可通过 `OCR_LANG` 指定识别语言。 [still 项目](https://github.com/faergeek/still)
+
+`Super+Shift+O` 通过 niri 截图，并把 Tesseract 识别结果复制到剪贴板。`Super+Shift+S` 用于截图标注。
 
 ## 登录自启
 
-在 Manggo 内开启开机自启后，应用生成 `~/.config/autostart/Manggo.desktop`。niri 会话通过 `xdg-desktop-autostart.target` 加载它，systemd 生成 `app-Manggo@autostart.service`。这是登录桌面时启动，无需再添加 `spawn-at-startup "Manggo"`。
+在 Manggo 内开启开机自启后，应用生成 `~/.config/autostart/com.pylogmon.Manggo.desktop`。niri 会话通过 `xdg-desktop-autostart.target` 加载它，systemd 生成 `app-com.pylogmon.Manggo@autostart.service`。
 
 仓库保存了当前自启文件，并在 MANIFEST 中标记为 `state`：普通安装保留已有文件，缺失时初始化。之后在 Manggo 内开关自启，仍由应用管理该文件。
 
-如需登录后只在托盘运行，关闭 Manggo 的“启动时打开设置”。本机核验时，该设置对应 `[startup]` 下的 `openSettings=false`。
+如需登录后只在托盘运行，在 Manggo 设置中关闭启动时打开设置窗口的选项。
 
 自启配置在下次登录时加载，检查方法：
 
 ```sh
-cat ~/.config/autostart/Manggo.desktop
+cat ~/.config/autostart/com.pylogmon.Manggo.desktop
 systemctl --user is-active niri.service xdg-desktop-autostart.target
 # 下次登录后检查实际的自启服务：
-systemctl --user status app-Manggo@autostart.service
+systemctl --user status app-com.pylogmon.Manggo@autostart.service
 ```
 
 ## 截图 Portal
@@ -74,11 +80,11 @@ systemctl --user status app-Manggo@autostart.service
 systemctl --user restart xdg-desktop-portal.service
 ```
 
-可用 `Manggo --action capture-area` 检查选区截图是否打开，按 Esc 取消。查看错误日志：
+可以从 Manggo 界面发起一次截图来检查 Portal。`Super+S` 使用上文的本地截图链路。查看 Portal 错误日志：
 
 ```sh
 journalctl --user -b -u xdg-desktop-portal.service \
     -u xdg-desktop-portal-wlr.service -u xdg-desktop-portal-gtk.service
 ```
 
-2026-11-17 已验证 wlr 后端实际返回成功并生成 2560×1440 截图，测试图片随即删除；Manggo 的“选区截图”窗口也能正常打开并关闭。翻译结果仍取决于应用内配置的翻译服务。
+翻译结果取决于应用内配置的翻译服务。

@@ -54,7 +54,7 @@ niri（`Super` 即 Mod）：
 
 截图分两套：`Print` 系走 niri 内置，快，适合立刻要图；`Mod+Shift+S` 和 `Mod+Shift+O` 的选区也走 niri 截图 UI（选区期间冻结画面，grim + slurp 是实时画面，不冻结），选完再由 satty 标注或 tesseract 识别。`Mod+Shift+S` 存盘到 `~/Pictures/Screenshots`，只保留最近 200 张（`SCREENSHOT_KEEP` 可改，0 = 不清理），niri 自带 `Print` 存的图也计入。脚本在 `local/bin/screenshot-annotate`、`local/bin/ocr-region`。
 
-Manggo 的安装、快捷键、自启和截图故障处理见 [Manggo 使用说明](docs/manggo.md)。快捷键由 niri 注册，截图使用 wlr Portal，屏幕共享保留 GNOME 后端。
+Manggo 的截图快捷键通过本地 Tesseract 识别选区。应用内截图使用 wlr Portal，屏幕共享使用 GNOME 后端。 [Manggo 安装与故障处理](docs/manggo.md)
 
 tmux：前缀 `Ctrl+x`（连按两次透传字面 `Ctrl+x`；另有兼容前缀 `Ctrl+b`）。新建窗口 `Ctrl+x` `c`，横向分割 `-`，纵向 `|`。默认开鼠标，选中即复制到系统剪贴板。
 
@@ -79,6 +79,7 @@ Orca 内的 `Ctrl+W` 会关闭应用标签页，窗口操作使用上面的 `<le
 - `Super+T` 打开 Foot。字体、透明度和模糊设置在 [`foot/foot.ini`](foot/foot.ini)，导入的 Noctalia 配色独立管理。安装时只在缺失的情况下初始化配色文件，之后由 Noctalia 更新。
 - 交互式 Zsh 有 `eza` 时，`ls` 显示表头、颜色和 Nerd Font 图标，目录优先。`la` 含隐藏项，`ll` 还显示 `.` 和 `..`。`command ls` 可以直接使用 GNU `ls`。
 - `Ctrl+T` 用 `fzf` 搜文件和目录。文件右侧预览前 200 行，使用 `bat` 高亮，目录则显示内容列表。已打开的 tmux 窗格用 `source ~/.zshrc` 加载更新。
+- `fuck` 在第一次调用时初始化。Oh My Pi 的 `omp` 补全优先用软件包提供的版本。
 - `git diff` 在交互终端用 Delta 显示行号，终端宽度达到 120 列时左右对照。Git 会查找 `PATH` 和 `~/.local/bin/delta`，找不到时输出原始差异。
 - `Super+E` 打开 Nautilus，用侧栏查看、挂载和弹出可移动设备，也支持鼠标拖拽。需要在终端浏览时可以运行 `yazi`，`s` 搜文件名，`Shift+S` 搜文件内容。
 
@@ -140,7 +141,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 ./tool/mycfg-pkgs install          # 打印补齐命令，不执行
 ```
 
-换机器或重装后先运行 `tool/mycfg-pkgs install` 并手动执行它打印的装包命令，再运行 `./install.sh`。`install.sh` 结尾会自动提示缺包数量。
+换机器或重装时，先按说明安装 Manggo 1.3.9，再运行 `tool/mycfg-pkgs install` 并执行它打印的装包命令。最后运行 `./install.sh`，脚本结尾会提示缺包数量。 [Manggo 安装说明](docs/manggo.md)
 
 这台机器的 `eza` 和 `delta` 目前位于 `~/.local/bin`，来自校验过的 Arch 官方包。`mycfg-pkgs check` 通过 pacman 查询软件包，因此这两个用户级安装仍显示为缺包。重装时可按清单安装官方软件包，由 pacman 管理更新。
 
@@ -159,6 +160,7 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 ## Noctalia v5
 
 - 启动：niri `spawn-at-startup "noctalia"`；IPC 一律 `noctalia msg ...`（旧的 `qs -c noctalia-shell ipc call ...` 已失效）
+- niri 启动时也运行 `swaybg` 来显示兜底壁纸，避免等待 Noctalia 加载时看到黑屏。换机器时把 [`niri/config.kdl`](niri/config.kdl) 里的图片路径改为实机路径。
 - `~/.config/noctalia/config.toml`：声明式配置——backdrop、启动器/剪贴板面板里把 Tab 映射到 Up/Down
 - `~/.local/state/noctalia/settings.toml`：运行时状态，**优先级高于 config.toml**。GUI 里改任何设置（换壁纸、调动画、开关组件）都会整份重写它，所以它一直在漂。改完设置同步进仓库：
 

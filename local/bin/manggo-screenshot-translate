@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# 优先用 still 冻结画面。缺少工具时，用 niri 自带的冻结选区和 OCR。
+set -euo pipefail
+
+still="$HOME/.local/bin/still"
+if [[ ! -x "$still" ]]; then
+    still=$(command -v still || true)
+fi
+
+if [[ -n "$still" ]] && command -v slurp >/dev/null && command -v grim >/dev/null; then
+    image=$(mktemp --suffix=.png)
+    trap 'rm -f -- "$image"' EXIT
+
+    if ! "$still" -c '
+        region=$(slurp) || exit 0
+        exec grim -g "$region" -
+    ' > "$image"; then
+        notify-send -a Manggo '截图翻译' '冻结画面或截图失败'
+        exit 1
+    fi
+    [[ -s "$image" ]] || exit 0
+
+    if ! text=$(tesseract "$image" stdout -l "${OCR_LANG:-chi_sim+eng}" --psm 6); then
+        notify-send -a Manggo '截图翻译' '文字识别失败'
+        exit 1
+    fi
+    if [[ ! $text =~ [^[:space:]] ]]; then
+        notify-send -a Manggo '截图翻译' '选区里没有识别到文字'
+        exit 0
+    fi
+else
+    text=$("$(dirname -- "${BASH_SOURCE[0]}")/ocr-region" --stdout)
+    [[ -n "$text" ]] || exit 0
+fi
+
+manggo --action input-translation --text "$text"

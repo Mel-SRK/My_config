@@ -42,6 +42,15 @@ assert_eq 9 "$status" '复制失败保留失败退出码'
 ! grep -q '^copy ' "$tmp/copy.log" || fail '复制失败不打印成功'
 pass '复制失败不打印成功'
 
+mkdir -p -- "$HOME/.config/directory-target"
+printf 'source file\t~/.config/directory-target\tuser\tfixture\n' > "$repo/MANIFEST.tsv"
+if run --apply > "$tmp/directory-target.log" 2>&1; then
+  fail '文件目标为目录时安装必须失败'
+fi
+[[ -d "$HOME/.config/directory-target" && ! -e "$HOME/.config/directory-target/source file" ]] ||
+  fail '安装失败时保留目标目录且不写入其中'
+pass '文件目标为目录时安装失败且不写入目录'
+
 printf 'source file\t/etc/myconfig quote\troot\tfixture\n' > "$repo/MANIFEST.tsv"
 run > "$tmp/root.log"
 root_command=$(sed -n '/^sudo install /p' "$tmp/root.log")

@@ -7,6 +7,10 @@
 set -euo pipefail
 
 lang="${OCR_LANG:-chi_sim+eng}"
+case "$#:${1:-}" in
+  0:|1:--stdout) ;;
+  *) echo '用法：ocr-region [--stdout]' >&2; exit 2 ;;
+esac
 
 command -v niri >/dev/null 2>&1 || { echo '需要 niri' >&2; exit 1; }
 tmp=$(mktemp --suffix=.png)
@@ -25,6 +29,11 @@ text=$(tesseract "$tmp" - -l "$lang" --psm 6 2>/dev/null | sed '/^[[:space:]]*$/
 if [[ -z "$text" ]]; then
   notify-send -a ocr 'OCR' '没识别到文字'
   exit 1
+fi
+
+if [[ "${1:-}" == --stdout ]]; then
+  printf '%s\n' "$text"
+  exit 0
 fi
 
 printf '%s\n' "$text" | wl-copy

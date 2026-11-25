@@ -167,6 +167,34 @@ window-rule {
     clip-to-geometry true
 }
 
+
+// Manggo 的透明弹窗需要让 niri 只绘制外侧焦点环。
+window-rule {
+    match app-id=r#"^com\.pylogmon\.Manggo$"#
+    draw-border-with-background false
+}
+
+
+// Manggo 翻译窗四周有 24 逻辑像素的透明留白，向内绘制贴着内容的焦点轮廓。
+window-rule {
+    match app-id=r#"^com\.pylogmon\.Manggo$"# title="^(翻译|Translation)$"
+    max-width 568
+    // GTK 3 浮窗收到平铺状态时，内容变化可能要等失焦才重新调整尺寸。
+    tiled-state false
+    focus-ring { off; }
+    border { off; }
+    geometry-corner-radius 37
+    shadow {
+        on
+        softness 0
+        spread -21
+        offset x=0 y=0
+        draw-behind-window true
+        color "#58a6ff"
+        inactive-color "#010409"
+    }
+}
+
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
@@ -175,10 +203,24 @@ binds {
     // spawn 不走 shell，niri 自己的 PATH 里没有 ~/.local/bin，必须显式展开
     Mod+Shift+S hotkey-overlay-title="Screenshot & Annotate" { spawn-sh "exec ~/.local/bin/screenshot-annotate"; }
     Mod+Shift+O hotkey-overlay-title="OCR Region" { spawn-sh "exec ~/.local/bin/ocr-region"; }
-    // Wayland 全局热键由 niri 注册，Manggo --action 支持自动启动或转发到已有实例。
-    Mod+A hotkey-overlay-title="Translate Selection" { spawn "Manggo" "--action" "selection-translation"; }
-    Mod+S hotkey-overlay-title="Translate Screen Area" { spawn "Manggo" "--action" "screenshot-translation"; }
-    Mod+Shift+A hotkey-overlay-title="Open Translator" { spawn "Manggo" "--action" "input-translation"; }
+    // Wayland 全局热键由 niri 注册，manggo --action 支持自动启动或转发到已有实例。
+    Mod+A repeat=false hotkey-overlay-title="Translate Selection" {
+        spawn-sh r#"
+            if selected=$(/usr/bin/timeout 1s /usr/bin/wl-paste --primary --type text --no-newline 2>/dev/null); then
+                case "$selected" in
+                    *[![:space:]]*)
+                        if /usr/bin/manggo --action input-translation --text "$selected"; then
+                            exit 0
+                        fi
+                        ;;
+                esac
+            fi
+            /usr/bin/sleep 0.15
+            exec /usr/bin/manggo --action selection-translation
+        "#
+    }
+    Mod+S repeat=false hotkey-overlay-title="Translate Screen Area" { spawn-sh "exec ~/.local/bin/manggo-screenshot-translate"; }
+    Mod+Shift+A hotkey-overlay-title="Open Translator" { spawn "manggo" "--action" "input-translation"; }
     Ctrl+Alt+Right hotkey-overlay-title="Media Next" { spawn "noctalia" "msg" "media" "next"; }
     Ctrl+Alt+Left hotkey-overlay-title="Media Previous" { spawn "noctalia" "msg" "media" "previous"; }
     Mod+B hotkey-overlay-title="Clipboard" { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }

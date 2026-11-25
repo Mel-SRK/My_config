@@ -145,5 +145,48 @@ mkdir -p "$tmp/shots with spaces"
 printf old > "$tmp/shots with spaces/old image.png"
 SCREENSHOT_KEEP=0 SCREENSHOT_DIR="$tmp/shots with spaces" "$ROOT/local/bin/screenshot-annotate" || fail '禁用清理时支持含空格目录'
 assert_eq 2 "$(find "$tmp/shots with spaces" -name '*.png' | wc -l)" 'SCREENSHOT_KEEP=0 不删旧图'
+
+# Run translation in an isolated PATH so host optional packages cannot affect the fallback.
+mkdir -p "$tmp/translate-bin" "$tmp/translate-home/.local/bin"
+for cmd in bash dirname mktemp rm sed sleep; do
+  ln -s "$(command -v "$cmd")" "$tmp/translate-bin/$cmd"
+done
+for cmd in niri notify-send seq tesseract wl-copy; do
+  ln -s "$tmp/bin/$cmd" "$tmp/translate-bin/$cmd"
+done
+cat > "$tmp/translate-bin/manggo" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$@" > "$CAPTURE_TEST_ROOT/translation"
+STUB
+chmod +x "$tmp/translate-bin/manggo"
+translate() {
+  HOME="$tmp/translate-home" PATH="$tmp/translate-bin" "$ROOT/local/bin/manggo-screenshot-translate"
+}
+
+rm -f -- "$tmp/clipboard"
+translate || fail '缺少 still 时截图翻译跑通'
+assert_eq $'--action\ninput-translation\n--text\nOCR TEXT' "$(cat "$tmp/translation")" '识别文字作为独立参数交给 Manggo'
+[[ ! -e "$tmp/clipboard" ]] || fail '翻译模式不把识别结果写到剪贴板'
+pass '翻译模式不把识别结果写到剪贴板'
+
+rm -- "$tmp/translation"
+CAPTURE_MODE=cancel translate || fail '取消截图翻译正常退出'
+[[ ! -e "$tmp/translation" ]] || fail '取消选区不启动翻译'
+pass '取消选区不启动翻译'
+
+cat > "$tmp/translate-home/.local/bin/still" <<'STUB'
+#!/usr/bin/env bash
+[[ "$1" == -c ]] || exit 1
+exec bash -c "$2"
+STUB
+printf '#!/usr/bin/env bash\nprintf "0,0 100x100"\n' > "$tmp/translate-bin/slurp"
+printf '#!/usr/bin/env bash\n[[ "$*" == "-g 0,0 100x100 -" ]] || exit 1\nprintf "fake-png"\n' > "$tmp/translate-bin/grim"
+chmod +x "$tmp/translate-home/.local/bin/still" "$tmp/translate-bin/"{slurp,grim}
+rm -- "$tmp/capture-path"
+translate || fail '本机仍可使用 still 截图翻译'
+[[ ! -e "$tmp/capture-path" ]] || fail 'still 可用时优先使用原来的截图方式'
+pass 'still 可用时优先使用原来的截图方式'
+assert_eq $'--action\ninput-translation\n--text\n\nOCR TEXT' "$(cat "$tmp/translation")" 'still 截图识别文字交给 Manggo'
+
 [[ -z "$(find "$TMPDIR" -mindepth 1 -print -quit)" ]] || fail 'OCR 各分支均清理临时图'
 pass 'OCR 各分支均清理临时图'

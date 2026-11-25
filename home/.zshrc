@@ -111,13 +111,20 @@ if (( __have_tty )); then
     # p10k 配置
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-    # 可选工具：未安装时不影响 shell 启动。
+    # thefuck 生成的函数会读取当前 shell 的历史，只在第一次调用时加载。
     if command -v thefuck >/dev/null 2>&1; then
-        eval "$(thefuck --alias)"
+        function fuck {
+            local definition
+            definition=$(command thefuck --alias fuck) || return
+            unfunction fuck
+            eval "$definition" || return
+            (( $+functions[fuck] )) || return 1
+            fuck "$@"
+        }
     fi
 
-    # Oh-my-pi
-    if command -v omp >/dev/null 2>&1; then
+    # Arch 包自带 _omp，compinit 已注册。独立安装时才从 omp 生成补全。
+    if [[ -z ${_comps[omp]-} ]] && command -v omp >/dev/null 2>&1; then
         eval "$(omp completions zsh)"
     fi
 fi

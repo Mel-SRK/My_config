@@ -1,0 +1,27 @@
+pkgname=manggo
+pkgver=1.3.9
+pkgrel=0.1
+pkgdesc='Desktop translation and screenshot OCR assistant'
+arch=('x86_64')
+url='https://manggo.pylogmon.cn/'
+license=('LicenseRef-Manggo-Proprietary')
+depends=('glibc' 'gtk3' 'hicolor-icon-theme')
+optdepends=('libayatana-appindicator: system tray integration'
+            'gtk-layer-shell: Wayland layer-shell integration'
+            'xdg-desktop-portal: Wayland desktop integration')
+options=('!strip' '!debug')
+source=("https://gitcode.com/Pylogmon/Manggo/releases/download/$pkgver/manggo-$pkgver-linux-amd64.tar.gz")
+sha256sums=('f57b79f31989df566183bc33ec6e62a50488d1d20fcb33c80f6a370ac4add017')
+
+package() {
+    install -d "$pkgdir/opt/manggo" "$pkgdir/usr/bin"
+    cp -a --no-preserve=ownership \
+        "$srcdir"/{.mygo-files,LICENSE,manggo,manggo.desktop,manggo.png,models,workers} \
+        "$pkgdir/opt/manggo/"
+    chmod 644 "$pkgdir/opt/manggo/.mygo-files"
+    ln -s ../../opt/manggo/manggo "$pkgdir/usr/bin/manggo"
+
+    install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/manggo/LICENSE"
+    install -Dm644 "$srcdir/manggo.desktop" "$pkgdir/usr/share/applications/manggo.desktop"
+    install -Dm644 "$srcdir/manggo.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/manggo.png"
+}

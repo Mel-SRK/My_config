@@ -6,7 +6,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 capture_home="$tmp/home with spaces"
 mkdir -p "$capture_home/.local/bin"
-for file in local/bin/screenshot-annotate local/bin/ocr-region; do
+for file in local/bin/{screenshot-annotate,ocr-region,manggo-screenshot-translate}; do
   assert_file "$ROOT/$file" "$file 存在"
   [[ -x "$ROOT/$file" ]] || fail "$file 可执行"
   pass "$file 可执行"
@@ -16,8 +16,12 @@ for file in local/bin/screenshot-annotate local/bin/ocr-region; do
 done
 
 # Check the actual spawn-sh command and its installed target under a clean HOME.
-for name in screenshot-annotate ocr-region; do
-  if [[ "$name" == screenshot-annotate ]]; then bind='Mod\+Shift\+S'; else bind='Mod\+Shift\+O'; fi
+for name in screenshot-annotate ocr-region manggo-screenshot-translate; do
+  case "$name" in
+    screenshot-annotate) bind='Mod\+Shift\+S' ;;
+    ocr-region) bind='Mod\+Shift\+O' ;;
+    manggo-screenshot-translate) bind='Mod\+S' ;;
+  esac
   grep -qE "^[[:space:]]*$bind[[:space:]].*\{[[:space:]]*spawn-sh \"exec ~/\.local/bin/$name\";[[:space:]]*\}" "$ROOT/niri/config.kdl" ||
     fail "niri 绑定使用可展开的 spawn-sh：$name"
   pass "niri 绑定使用可展开的 spawn-sh：$name"

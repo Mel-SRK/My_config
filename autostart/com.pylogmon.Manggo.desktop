@@ -1,8 +1,6 @@
 [Desktop Entry]
 Type=Application
-Version=1.0
 Name=Manggo
-Exec="/usr/lib/manggo/bin/Manggo"
+Exec="/opt/manggo/manggo" --mygo-opened-at-login
 Terminal=false
-NoDisplay=true
 X-GNOME-Autostart-enabled=true
