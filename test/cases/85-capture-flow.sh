@@ -7,6 +7,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/shots" "$tmp/work"
 export CAPTURE_TEST_ROOT="$tmp" TMPDIR="$tmp/work"
+printf 'fake-png\x00\x00\x00\x00IEND\xae\x42\x60\x82' > "$tmp/complete-png"
 
 # niri 桩：解析 --path，延迟写一张假图（模拟选区完成后落盘）
 cat > "$tmp/bin/niri" <<'STUB'
@@ -16,13 +17,20 @@ while [[ $# -gt 0 ]]; do
   [[ "$1" == --path ]] && out="$2"
   shift
 done
-[[ -n "${out:-}" ]] || exit 1
+[[ "${out:-}" == /* ]] || exit 1
 printf '%s\n' "$out" > "$CAPTURE_TEST_ROOT/capture-path"
 case "${CAPTURE_MODE:-ok}" in
   cancel) exit 0 ;;
   fail) exit 7 ;;
 esac
-(sleep 0.2; printf 'fake-png' > "$out") >/dev/null 2>&1 &
+(
+  sleep 0.2
+  if [[ "${CAPTURE_MODE:-ok}" == partial ]]; then
+    printf 'fake-png' > "$out"
+    sleep 0.4
+  fi
+  cat "$CAPTURE_TEST_ROOT/complete-png" > "$out"
+) >/dev/null 2>&1 &
 STUB
 # satty 桩：把输入原样留在输出位置
 cat > "$tmp/bin/satty" <<'STUB'
@@ -35,13 +43,18 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 [[ -n "${in:-}" && -n "${out:-}" ]] || exit 1
+cmp -s -- "$in" "$CAPTURE_TEST_ROOT/complete-png" || exit 2
 printf 'annotated' > "$out"
 STUB
+printf '#!/usr/bin/env bash\necho "2000-01-01 00-00-00"\n' > "$tmp/bin/date"
 printf '#!/usr/bin/env bash\ncat > "%s/clipboard"\n' "$tmp" > "$tmp/bin/wl-copy"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "%s/notify"\n' "$tmp" > "$tmp/bin/notify-send"
 cat > "$tmp/bin/tesseract" <<'STUB'
 #!/usr/bin/env bash
 printf '%s\n' "$@" > "$CAPTURE_TEST_ROOT/tesseract-args"
+if [[ "${CAPTURE_MODE:-ok}" == partial ]]; then
+  cmp -s -- "$1" "$CAPTURE_TEST_ROOT/complete-png" || exit 2
+fi
 case "${OCR_MODE:-ok}" in
   empty) printf '\n  \n'; exit 0 ;;
   fail) exit 9 ;;
@@ -66,8 +79,8 @@ for i in 1 2 3; do
 done
 
 export SCREENSHOT_DIR="$tmp/shots" SCREENSHOT_KEEP=2
-"$ROOT/local/bin/screenshot-annotate" || fail 'screenshot-annotate 跑通'
-pass 'screenshot-annotate 跑通'
+CAPTURE_MODE=partial "$ROOT/local/bin/screenshot-annotate" || fail 'screenshot-annotate 等到完整图片'
+pass 'screenshot-annotate 等到完整图片'
 count=$(find "$tmp/shots" -name '*.png' | wc -l)
 assert_eq 2 "$count" '按 SCREENSHOT_KEEP 保留张数'
 [[ -e "$tmp/shots/shot-3.png" ]] || fail '最新的旧图被保留'
@@ -79,8 +92,8 @@ newest=$(find "$tmp/shots" -name '*.png' ! -name 'shot-*' | head -1)
 pass '产生了新截图'
 assert_eq annotated "$(cat "$newest")" 'satty 的输出写回同一张图'
 
-"$ROOT/local/bin/ocr-region" || fail 'ocr-region 跑通'
-pass 'ocr-region 跑通'
+CAPTURE_MODE=partial "$ROOT/local/bin/ocr-region" || fail 'ocr-region 等到完整图片'
+pass 'ocr-region 等到完整图片'
 [[ "$(cat "$tmp/clipboard")" == 'OCR TEXT' ]] || fail 'OCR 结果进剪贴板'
 pass 'OCR 结果进剪贴板'
 grep -q 'OCR 已复制到剪贴板' "$tmp/notify" || fail 'OCR 弹通知'
@@ -116,7 +129,8 @@ done
 status=0
 SATTY_MODE=fail SCREENSHOT_DIR="$tmp/satty-failure" "$ROOT/local/bin/screenshot-annotate" || status=$?
 assert_eq 8 "$status" 'satty 失败保留退出码'
-assert_eq fake-png "$(cat "$(cat "$tmp/capture-path")")" 'satty 失败仍保留原图'
+cmp -s -- "$(cat "$tmp/capture-path")" "$tmp/complete-png" || fail 'satty 失败仍保留原图'
+pass 'satty 失败仍保留原图'
 
 # 大文本 OCR：预览长度截断必须走 bash 变量，不能 head -c（会 SIGPIPE 打断脚本）
 rm -f "$tmp/clipboard"
@@ -141,14 +155,30 @@ pass '含空格文件名被正确删除'
 [[ -e "$tmp/work2/old" && -e "$tmp/work2/image.png" ]] || fail '不误删当前目录的无关文件'
 pass '不误删当前目录的无关文件'
 
+old_png=$'old image\ndecoy.png'
+printf old > "$tmp/spadecoy/$old_png"
+touch -d '-10 minutes' "$tmp/spadecoy/$old_png"
+: > "$tmp/work2/decoy.png"
+(cd "$tmp/work2" && SCREENSHOT_KEEP=1 SCREENSHOT_DIR="$tmp/spadecoy" "$ROOT/local/bin/screenshot-annotate") ||
+  fail '含换行文件名的清理跑通'
+[[ ! -e "$tmp/spadecoy/$old_png" && -e "$tmp/work2/decoy.png" ]] || fail '换行不拆分清理路径'
+pass '换行不拆分清理路径'
+
 mkdir -p "$tmp/shots with spaces"
 printf old > "$tmp/shots with spaces/old image.png"
-SCREENSHOT_KEEP=0 SCREENSHOT_DIR="$tmp/shots with spaces" "$ROOT/local/bin/screenshot-annotate" || fail '禁用清理时支持含空格目录'
-assert_eq 2 "$(find "$tmp/shots with spaces" -name '*.png' | wc -l)" 'SCREENSHOT_KEEP=0 不删旧图'
+for _ in 1 2; do
+  (cd "$tmp" && SCREENSHOT_KEEP=0 SCREENSHOT_DIR='shots with spaces' "$ROOT/local/bin/screenshot-annotate") ||
+    fail '支持含空格的相对截图目录'
+done
+assert_eq 3 "$(find "$tmp/shots with spaces" -name '*.png' | wc -l)" '同一秒内截图各自存盘且 SCREENSHOT_KEEP=0 不删旧图'
+
+status=0
+SCREENSHOT_KEEP=-1 "$ROOT/local/bin/screenshot-annotate" || status=$?
+assert_eq 2 "$status" '非法保留张数取消截图操作'
 
 # Run translation in an isolated PATH so host optional packages cannot affect the fallback.
 mkdir -p "$tmp/translate-bin" "$tmp/translate-home/.local/bin"
-for cmd in bash dirname mktemp rm sed sleep; do
+for cmd in bash cat cmp dirname mktemp rm sed sleep tail; do
   ln -s "$(command -v "$cmd")" "$tmp/translate-bin/$cmd"
 done
 for cmd in niri notify-send seq tesseract wl-copy; do

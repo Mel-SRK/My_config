@@ -5,9 +5,10 @@ source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/../lib/base-test.sh"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 repo="$tmp/repo with 'quote"
-mkdir -p "$repo/tool" "$tmp/bin" "$tmp/home with spaces"
+mkdir -p "$repo/tool" "$repo/tools" "$tmp/bin" "$tmp/home with spaces"
 cp -- "$ROOT/install.sh" "$repo/install.sh"
 cp -- "$ROOT/tool/mycfg-post" "$repo/tool/mycfg-post"
+cp -- "$ROOT/tools/check-sync.sh" "$repo/tools/check-sync.sh"
 for name in mycfg-migrate mycfg-pkgs; do
   printf '#!/usr/bin/env bash\nexit 0\n' > "$repo/tool/$name"
   chmod +x "$repo/tool/$name"
@@ -30,9 +31,16 @@ done
 printf payload > "$repo/source file"
 # No final newline: the last record must still be processed.
 printf 'source file\t~/.config/dest file\tuser\tfixture' > "$repo/MANIFEST.tsv"
+if "$repo/tools/check-sync.sh" > "$tmp/sync.log"; then
+  fail '同步检查处理无末尾换行的缺失条目'
+fi
+grep -q '^MISSING .*dest file$' "$tmp/sync.log" || fail '同步检查报告末行的缺失文件'
 run --apply >/dev/null || fail '空格路径和无末尾换行的条目可安装'
 cmp -s "$repo/source file" "$HOME/.config/dest file" || fail '空格路径内容一致'
 pass '空格路径和无末尾换行的条目可安装'
+"$repo/tools/check-sync.sh" > "$tmp/sync.log" || fail '同步检查通过已安装的末行条目'
+grep -q '^same .*source file' "$tmp/sync.log" || fail '同步检查报告末行的已安装文件'
+pass '同步检查处理无末尾换行的条目'
 
 printf '#!/usr/bin/env bash\nexit 9\n' > "$tmp/bin/cp"
 chmod +x "$tmp/bin/cp"

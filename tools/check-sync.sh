@@ -9,7 +9,7 @@ filter="${1:-}"
 
 same=0; diffn=0; missing=0
 
-while IFS=$'\t' read -r src dst mode desc extra; do
+while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
   case "${src:-}" in ''|'#'*) continue ;; esac
   cls="${extra:-config}"
   [ -n "$filter" ] && case "$src" in *"$filter"*) ;; *) continue ;; esac

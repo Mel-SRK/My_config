@@ -32,21 +32,27 @@ write_led() {
     fi
 }
 
-get_mute() {
-    wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q '\[MUTED\]' && echo 1 || echo 0
-}
-
 sync_led() {
-    write_led "$(get_mute)"
+    local volume
+    # The default source can be temporarily unavailable during a restart or device switch.
+    volume=$(LC_ALL=C wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null) || return 0
+    case "$volume" in
+        *'[MUTED]'*) write_led 1 ;;
+        *) write_led 0 ;;
+    esac
 }
 
 # Initial sync
 sync_led
 
 # Subscribe to PipeWire source events
-pactl subscribe 2>/dev/null | while read -r line; do
-    # Match source state changes (mute toggle, default source switch)
-    if echo "$line" | grep -qE "on source #|on server"; then
-        sync_led
-    fi
+LC_ALL=C pactl subscribe | while IFS= read -r line; do
+    case "$line" in
+        *' on source #'*) sync_led ;;
+        *' on server'*) sync_led ;;
+    esac
 done
+
+# Any end to the event stream requires a fresh subscription.
+printf '%s\n' 'micmute-led-sync: PulseAudio event stream closed' >&2
+exit 1

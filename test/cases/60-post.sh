@@ -64,3 +64,38 @@ HOME="$tmp/directory-home" "$ROOT/tool/mycfg-post" --apply >/dev/null 2>&1 || st
 assert_eq 1 "$status" 'tmux 入口为真实目录时失败而不在其中建链接'
 [[ -z "$(find "$tmp/directory-home/.tmux.conf" -mindepth 1 -print -quit)" ]] || fail '原有 tmux 目录保持不变'
 pass '原有 tmux 目录保持不变'
+
+conflict_home="$tmp/conflict-home"
+mkdir -p "$conflict_home/.config/tmux" "$conflict_home/.local/bin"
+cp -- "$ROOT/tmux/.tmux.conf" "$ROOT/tmux/.tmux.conf.local" "$conflict_home/.config/tmux/"
+printf 'custom-config\n' > "$conflict_home/.tmux.conf.local"
+: > "$conflict_home/.local/bin/screenshot-annotate"
+chmod 644 "$conflict_home/.local/bin/screenshot-annotate"
+HOME="$conflict_home" "$ROOT/tool/mycfg-post" > "$tmp/plan" 2> "$tmp/conflict" || fail 'tmux 冲突时仍可打印安装计划'
+grep -q '请先备份并移走' "$tmp/conflict" || fail '安装计划给出处理冲突的说明'
+pass 'tmux 冲突时仍可打印安装计划'
+status=0
+HOME="$conflict_home" "$ROOT/tool/mycfg-post" --apply >/dev/null 2>"$tmp/conflict" || status=$?
+assert_eq 1 "$status" '已有 tmux 配置文件时返回部分完成'
+[[ -f "$conflict_home/.tmux.conf.local" && ! -L "$conflict_home/.tmux.conf.local" ]] || fail '保留普通 tmux 配置文件'
+assert_eq custom-config "$(cat "$conflict_home/.tmux.conf.local")" '原有 tmux 配置文件内容不变'
+[[ ! -L "$conflict_home/.tmux.conf" ]] || fail '有冲突时两个入口均未更改'
+pass '有冲突时两个入口均未更改'
+assert_eq 755 "$(stat -c %a "$conflict_home/.local/bin/screenshot-annotate")" 'tmux 冲突时仍修复脚本权限'
+
+mv -- "$conflict_home/.tmux.conf.local" "$conflict_home/custom-config"
+ln -s -- custom-config "$conflict_home/.tmux.conf.local"
+status=0
+HOME="$conflict_home" "$ROOT/tool/mycfg-post" --apply >/dev/null 2>&1 || status=$?
+assert_eq 1 "$status" '已有其他 tmux 链接时收尾失败'
+assert_eq custom-config "$(readlink -- "$conflict_home/.tmux.conf.local")" '保留其他 tmux 链接的原始目标'
+
+missing_home="$tmp/missing-home"
+mkdir -p "$missing_home/.config/tmux"
+cp -- "$ROOT/tmux/.tmux.conf" "$missing_home/.config/tmux/"
+status=0
+HOME="$missing_home" "$ROOT/tool/mycfg-post" --apply >/dev/null 2>"$tmp/missing" || status=$?
+assert_eq 1 "$status" 'tmux 配置未全部安装时收尾失败'
+grep -q '请先运行 .*install.sh --apply' "$tmp/missing" || fail '缺少配置时提示先安装'
+[[ ! -L "$missing_home/.tmux.conf" && ! -L "$missing_home/.tmux.conf.local" ]] || fail '目标文件不全时不创建链接'
+pass '目标文件不全时不创建链接'

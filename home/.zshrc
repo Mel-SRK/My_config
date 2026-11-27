@@ -58,7 +58,7 @@ export all_proxy=socks5://127.0.0.1:7897
 # 本地开发服务直连；保留已有例外。
 typeset -aU __proxy_bypass
 __proxy_bypass=(localhost 127.0.0.1 ::1 "${(@s:,:)no_proxy}" "${(@s:,:)NO_PROXY}")
-export no_proxy="${(j:,:)__proxy_bypass:#}"
+export no_proxy="${(j:,:)${(@)__proxy_bypass:#}}"
 export NO_PROXY="$no_proxy"
 unset __proxy_bypass
 
@@ -71,6 +71,8 @@ if (( __have_tty )); then
     # Oh My Zsh
     export ZSH="/usr/share/oh-my-zsh"
     ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+    # 重载时保留补全路径的顺序和唯一性，让 Oh My Zsh 复用缓存。
+    typeset -gU fpath
 
     # Theme
     ZSH_THEME="powerlevel10k/powerlevel10k"

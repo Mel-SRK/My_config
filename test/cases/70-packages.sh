@@ -27,10 +27,15 @@ mkdir -p "$repo/packages" "$tmp/bin" "$tmp/work"
 cat > "$tmp/bin/pacman" <<'EOF'
 #!/usr/bin/env bash
 case "${PKG_MODE:-normal}:$1" in
-  fail:-Qem) echo 'database error' >&2; exit 1 ;;
-  partial:-Qem) printf 'partial 1\n'; exit 2 ;;
+  fail:-Qq) echo 'database error' >&2; exit 1 ;;
+  partial:-Qq) printf 'partial\n'; exit 2 ;;
+  explicit-fail:-Qem) echo 'database error' >&2; exit 1 ;;
+  explicit-partial:-Qem) printf 'partial 1\n'; exit 2 ;;
   empty:*) exit 1 ;;
   large:-Qen) for ((i=0; i<10000; i++)); do printf 'pkg%05d 1\n' "$i"; done ;;
+  classified:-Qq) printf 'extra\nbase\naur\nmoved\ninstalled-as-dependency\n' ;;
+  classified:-Qem) printf 'aur 1\nmoved 1\n' ;;
+  *:-Qq) printf 'extra\nbase\naur\n' ;;
   *:-Qen) printf 'extra 2\nbase 1\n' ;;
   *:-Qem) printf 'aur 1\n' ;;
   *) exit 2 ;;
@@ -71,12 +76,19 @@ grep -q '^yay -S --needed aur-missing$' <<< "$out" || fail 'install 优先打印
 [[ ! -e "$COMMAND_LOG" ]] || fail 'install 不执行 sudo 或 AUR helper'
 pass 'install 不执行 sudo 或 AUR helper'
 
-for mode in fail partial; do
-  for args in 'check --summary' 'write --apply' install; do
+for mode in explicit-fail explicit-partial; do
+  for args in 'check --summary' 'write --apply'; do
     status=0
     PKG_MODE="$mode" run $args > "$tmp/failure" 2>&1 || status=$?
     assert_eq 1 "$status" "$mode 查询失败使 $args 失败"
     assert_eq "$before" "$(sha256sum "$repo/packages/"*.txt)" "$mode 查询失败不覆盖任一清单"
+  done
+done
+for mode in fail partial; do
+  for args in 'check --summary' install; do
+    status=0
+    PKG_MODE="$mode" run $args > "$tmp/failure" 2>&1 || status=$?
+    assert_eq 1 "$status" "$mode 已装包查询失败使 $args 失败"
   done
 done
 PKG_MODE=large run write >/dev/null || fail '大 diff 预览不会被 head 的 SIGPIPE 中断'
@@ -87,6 +99,12 @@ assert_eq aur "$(cat "$repo/packages/foreign.txt")" '--apply 写入 foreign 包�
 run check --summary >/dev/null || fail '无缺包时 check exit 0'
 pass '无缺包时 check exit 0'
 assert_eq '没有缺的包' "$(run install)" 'install 无缺包时正常返回'
+
+printf 'base\ninstalled-as-dependency\nmoved\n' > "$repo/packages/official.txt"
+out=$(PKG_MODE=classified run check --summary) || fail '依赖安装和来源变化都算已安装'
+grep -q '^包：缺 0，未记录 1' <<< "$out" || fail '只统计真正未记录的显式安装包' "$out"
+pass '依赖安装和来源变化都算已安装'
+assert_eq '没有缺的包' "$(PKG_MODE=classified run install)" 'install 不为已经安装的包打印命令'
 
 repo="$tmp/absent packages"
 mkdir -p "$repo"

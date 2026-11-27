@@ -17,29 +17,31 @@ require_pacman() {
 
 # 输出排序后的包名，一个一行
 installed() {
-  local status=0
+  local query status=0
+  case "$1" in
+    all)      query=-Qq ;;
+    official) query=-Qen ;;
+    foreign)  query=-Qem ;;
+  esac
   # pacman also returns 1 for an empty selection. Only that silent, empty
   # result is valid; database errors must never turn into replacement lists.
-  case "$1" in
-    official) pacman -Qen > "$tmp/query" 2> "$tmp/query.err" || status=$? ;;
-    foreign)  pacman -Qem > "$tmp/query" 2> "$tmp/query.err" || status=$? ;;
-  esac
+  pacman "$query" > "$tmp/query" 2> "$tmp/query.err" || status=$?
   cat "$tmp/query.err" >&2
   [[ "$status" -eq 0 || ( "$status" -eq 1 && ! -s "$tmp/query" && ! -s "$tmp/query.err" ) ]] || return 1
-  awk '{print $1}' "$tmp/query" | LC_ALL=C sort
+  awk '{print $1}' "$tmp/query" | sort
 }
 
 recorded() {
   [[ -f "$DIR/$1.txt" ]] || return 0
-  awk 'NF && $1 !~ /^#/ {print $1}' "$DIR/$1.txt" | LC_ALL=C sort
+  awk 'NF && $1 !~ /^#/ {print $1}' "$DIR/$1.txt" | sort
 }
 
-collect() {
-  local kind=$1 tmp=$2
-  cp -- "$tmp/$kind" "$tmp/installed"
-  recorded "$kind" > "$tmp/recorded"
-  comm -23 "$tmp/recorded" "$tmp/installed" > "$tmp/missing"
-  comm -13 "$tmp/recorded" "$tmp/installed" > "$tmp/extra"
+read_package_presence() {
+  local kind
+  installed all > "$tmp/installed"
+  for kind in official foreign; do
+    recorded "$kind" > "$tmp/recorded-$kind"
+  done
 }
 
 [[ $# -gt 0 ]] || set -- check
@@ -50,11 +52,14 @@ case "$1" in
     require_pacman
     tmp=$(mktemp -d) || exit 1
     trap 'rm -rf "$tmp"' EXIT
+    read_package_presence
     for kind in official foreign; do installed "$kind" > "$tmp/$kind"; done
+    sort -u "$tmp/recorded-official" "$tmp/recorded-foreign" > "$tmp/recorded-all"
     total_missing=0
     total_extra=0
     for kind in official foreign; do
-      collect "$kind" "$tmp"
+      comm -23 "$tmp/recorded-$kind" "$tmp/installed" > "$tmp/missing"
+      comm -13 "$tmp/recorded-all" "$tmp/$kind" > "$tmp/extra"
       missing=$(wc -l < "$tmp/missing")
       extra=$(wc -l < "$tmp/extra")
       total_missing=$((total_missing+missing))
@@ -97,15 +102,13 @@ case "$1" in
     require_pacman
     tmp=$(mktemp -d) || exit 1
     trap 'rm -rf "$tmp"' EXIT
-    for kind in official foreign; do installed "$kind" > "$tmp/$kind"; done
-    missing_official=0
-    missing_foreign=0
+    read_package_presence
+    total_missing=0
     for kind in official foreign; do
-      collect "$kind" "$tmp"
-      count=$(wc -l < "$tmp/missing")
-      if [[ "$kind" == official ]]; then missing_official=$count; else missing_foreign=$count; fi
-      if [[ "$count" -gt 0 ]]; then
+      comm -23 "$tmp/recorded-$kind" "$tmp/installed" > "$tmp/missing"
+      if [[ -s "$tmp/missing" ]]; then
         mapfile -t names < "$tmp/missing"
+        total_missing=$((total_missing+${#names[@]}))
         if [[ "$kind" == official ]]; then
           echo "sudo pacman -S --needed ${names[*]}"
         elif command -v yay >/dev/null 2>&1; then
@@ -117,7 +120,7 @@ case "$1" in
         fi
       fi
     done
-    if [[ $((missing_official+missing_foreign)) -eq 0 ]]; then echo '没有缺的包'; fi
+    if [[ "$total_missing" -eq 0 ]]; then echo '没有缺的包'; fi
     ;;
   *) usage ;;
 esac

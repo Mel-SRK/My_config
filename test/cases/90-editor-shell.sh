@@ -37,3 +37,29 @@ out=$(env no_proxy='example.test,localhost' NO_PROXY='internal.test' \
     print -r -- "$no_proxy"
   ') || fail 'shell 环境加载成功'
 assert_eq 'localhost,127.0.0.1,::1,example.test,internal.test' "$out" '本地代理例外保留原值且嵌套 shell 不重复'
+
+out=$(env -u no_proxy -u NO_PROXY MYCONFIG_ZSHRC="$ROOT/home/.zshrc" zsh -f -c '
+  source "$MYCONFIG_ZSHRC"
+  print -r -- "$no_proxy"
+') || fail '无继承值时加载代理例外'
+assert_eq 'localhost,127.0.0.1,::1' "$out" '无继承值时代理例外没有空字段'
+
+if command -v script >/dev/null 2>&1 && [[ -r /usr/share/oh-my-zsh/oh-my-zsh.sh ]]; then
+  theme="$tmp/home/.oh-my-zsh/custom/themes/powerlevel10k"
+  mkdir -p "$theme" "$tmp/cache"
+  touch "$theme/powerlevel10k.zsh-theme"
+  cat > "$tmp/reload.zsh" <<'ZSH'
+source "$MYCONFIG_ZSHRC"
+before="$FPATH"
+source "$MYCONFIG_ZSHRC"
+[[ "$FPATH" == "$before" && ${#fpath[@]} -eq ${#${(u)fpath}[@]} ]]
+ZSH
+  out=$(env HOME="$tmp/home" ZDOTDIR="$tmp/home" XDG_CACHE_HOME="$tmp/cache" \
+    ZSH_CACHE_DIR="$tmp/cache" ZSH_COMPDUMP="$tmp/.zcompdump" \
+    TERM=xterm-256color TERM_PROGRAM=Orca MYCONFIG_ZSHRC="$ROOT/home/.zshrc" \
+    MYCONFIG_ZSH_TEST="$tmp/reload.zsh" script -qefc 'zsh -fi "$MYCONFIG_ZSH_TEST"' /dev/null) ||
+    fail '重载 Zsh 后补全路径不变且无重复' "$out"
+  pass '重载 Zsh 后补全路径不变且无重复'
+else
+  skip '重载 Zsh 后补全路径不变且无重复' '缺少 script 或 Oh My Zsh'
+fi

@@ -8,6 +8,27 @@ case "$#:${1:-}" in
   *) echo '用法：tool/mycfg-post [--apply]' >&2; exit 2 ;;
 esac
 steps=0
+
+# Check both entry points before creating either of the paired tmux links.
+tmux_links=()
+tmux_blocked=0
+for name in .tmux.conf .tmux.conf.local; do
+  target="$HOME/.config/tmux/$name"
+  link="$HOME/$name"
+  if [[ -e "$link" || -L "$link" ]] &&
+     [[ ! -L "$link" || "$(readlink -m -- "$link")" != "$(readlink -m -- "$target")" ]]; then
+    printf '保留现有 tmux 入口 %q。请先备份并移走该路径，再运行 %q --apply。\n' "$link" "$REPO/tool/mycfg-post" >&2
+    tmux_blocked=1
+    continue
+  fi
+  if [[ "$apply" -eq 1 && ! -f "$target" ]]; then
+    printf '缺少 tmux 配置文件 %q。请先运行 %q --apply。\n' "$target" "$REPO/install.sh" >&2
+    tmux_blocked=1
+    continue
+  fi
+  [[ -L "$link" ]] || tmux_links+=("$name")
+done
+
 units=0
 while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
   case "${src:-}" in ''|'#'*) continue ;; esac
@@ -30,16 +51,15 @@ while IFS=$'\t' read -r src dst mode desc extra || [[ -n "$src" ]]; do
   esac
 done < "$REPO/MANIFEST.tsv"
 
-# tmux's two entry points are the only post-install paths outside MANIFEST.
-for name in .tmux.conf .tmux.conf.local; do
-  target="$HOME/.config/tmux/$name"
-  link="$HOME/$name"
-  if [[ ! -L "$link" || "$(readlink -m -- "$link")" != "$(readlink -m -- "$target")" ]]; then
-    printf 'ln -sfnT %q %q\n' "$target" "$link"
+if [[ "$tmux_blocked" -eq 0 ]]; then
+  for name in "${tmux_links[@]}"; do
+    target="$HOME/.config/tmux/$name"
+    link="$HOME/$name"
+    printf 'ln -sT -- %q %q\n' "$target" "$link"
     steps=$((steps+1))
-    if [[ "$apply" -eq 1 ]]; then ln -sfnT -- "$target" "$link"; fi
-  fi
-done
+    if [[ "$apply" -eq 1 ]]; then ln -sT -- "$target" "$link"; fi
+  done
+fi
 
 recent_files_key=(org.gnome.desktop.privacy remember-recent-files)
 if recent_files_value=$(gsettings get "${recent_files_key[@]}" 2>/dev/null) && [[ "$recent_files_value" != false ]]; then
@@ -56,3 +76,4 @@ if [[ "$steps" -eq 0 ]]; then echo '无后续步骤'; fi
 echo 'niri msg action load-config-file'
 echo '重新登录后 environment.d/ 才生效'
 echo 'root 条目仍需按 install.sh 打印的 sudo 命令自己跑'
+[[ "$apply" -eq 0 || "$tmux_blocked" -eq 0 ]]

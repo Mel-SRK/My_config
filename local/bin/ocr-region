@@ -14,14 +14,20 @@ esac
 
 command -v niri >/dev/null 2>&1 || { echo '需要 niri' >&2; exit 1; }
 tmp=$(mktemp --suffix=.png)
+[[ $tmp == /* ]] || tmp="$PWD/$tmp"
 trap 'rm -f -- "$tmp"' EXIT
 
 niri msg action screenshot --path "$tmp" >/dev/null || exit 1
+# 等完整的 PNG 结束块，避免 niri 尚未写完就开始识别。
+ready=false
 for _ in $(seq 1 600); do
-  [[ -s "$tmp" ]] && break
+  if [[ -s "$tmp" ]] && tail -c 12 -- "$tmp" | cmp -s - <(printf '\x00\x00\x00\x00IEND\xae\x42\x60\x82'); then
+    ready=true
+    break
+  fi
   sleep 0.1
 done
-[[ -s "$tmp" ]] || exit 0
+"$ready" || exit 0
 
 # psm 6 = 当成一整块文本，比默认的自动分页更适合截代码/报错
 text=$(tesseract "$tmp" - -l "$lang" --psm 6 2>/dev/null | sed '/^[[:space:]]*$/d') || exit 1

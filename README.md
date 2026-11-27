@@ -103,6 +103,8 @@ git clone https://github.com/Mel-SRK/My_config && cd My_config
 ./tool/mycfg-post --apply   # 在用户图形会话中执行，修复权限与 tmux 链接，并在支持时关闭 GTK 最近文件记录。systemctl 命令仍需自己跑
 ```
 
+若 `~/.tmux.conf` 或 `~/.tmux.conf.local` 已有其他配置，收尾脚本会保留原文件，执行其余收尾步骤，并提示 tmux 链接待处理。需要切换到仓库的 tmux 配置时，可以先备份并移走冲突的入口，再运行 `./tool/mycfg-post --apply`。
+
 `install.sh` 不会碰 `archive/`。装完想确认有没有漏同步：
 
 ```shell
@@ -136,10 +138,12 @@ greetd 的两个文件（`/etc/greetd/config.toml`、`/etc/pam.d/greetd`）装�
 只记包名不记版本。三档用法：
 
 ```bash
-./tool/mycfg-pkgs check            # 缺哪些、哪些装了但没记录
+./tool/mycfg-pkgs check            # 缺哪些、哪些显式安装的包没记录
 ./tool/mycfg-pkgs write --apply    # 按当前机器重写清单（默认只预览 diff）
 ./tool/mycfg-pkgs install          # 打印补齐命令，不执行
 ```
+
+已作为依赖安装的包也算已安装。未记录只统计两份清单都没列出的显式安装包。
 
 换机器或重装时，先按说明安装 Manggo 1.3.9，再运行 `tool/mycfg-pkgs install` 并执行它打印的装包命令。最后运行 `./install.sh`，脚本结尾会提示缺包数量。 [Manggo 安装说明](docs/manggo.md)
 
